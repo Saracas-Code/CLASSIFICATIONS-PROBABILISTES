@@ -39,7 +39,7 @@ def getPrior(df) :
 # Question 1.2. Programmation orienté objet dans la hiérarchie des Classifiers
 #####
 class APrioriClassifier(utils.AbstractClassifier) :
-    
+
     def __init__(self, df):
         """
         Inicializa el clasificador con el DataFrame de entrenamiento.
@@ -68,14 +68,4 @@ class APrioriClassifier(utils.AbstractClassifier) :
 ##### 
 # QUESTION 2.1
 #####
-
-def P2D_l(df, attr) :
-    dictionnaire = {}
-    
-    
-
-
-
-
-
 
