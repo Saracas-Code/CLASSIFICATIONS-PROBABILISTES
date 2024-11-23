@@ -14,8 +14,8 @@ utils.viewData(discretise, kde=False)
 print("Q1.1-----------------------------------------------------------------------------------------------------------")
 train = pd.read_csv("data/train.csv")
 test = pd.read_csv("data/test.csv")
-projet.getPrior(train)
-projet.getPrior(test)
+print(projet.getPrior(train))
+print(projet.getPrior(test))
 
 print("Q1.2.a---------------------------------------------------------------------------------------------------------")
 cl = projet.APrioriClassifier(train)
@@ -38,3 +38,17 @@ p_target_given_thal = projet.P2D_p(train, 'thal')
 print(p_target_given_thal)
 print()
 print(f"Dans la base train, la probabilité que target=1 sachant que thal=3 est {p_target_given_thal[3][1]}")
+
+print("Q2.2---------------------------------------------------------------------------------------------------------")
+cl=projet.ML2DClassifier(train,"thal") # cette ligne appelle projet.P2Dl(train,"thal")
+for i in [0,1,2]:
+    print("Estimation de la classe de l'individu {} par ML2DClassifier : {}".format(i,cl.estimClass(utils.getNthDict(train,i))))
+print("test en apprentissage : {}".format(cl.statsOnDF(train)))
+print("test en validation: {}".format(cl.statsOnDF(test)))
+
+print("Q2.3---------------------------------------------------------------------------------------------------------")
+cl=projet.MAP2DClassifier(train,"thal") # cette ligne appelle projet.P2Dp(train,"thal")
+for i in [0,1,2]:
+    print("Estimation de la classe de l'individu {} par MAP2DClasssifer) : {}".format(i,cl.estimClass(utils.getNthDict(train,i)))) 
+print("test en apprentissage : {}".format(cl.statsOnDF(train)))
+print("test en validation: {}".format(cl.statsOnDF(test)))
