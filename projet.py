@@ -11,9 +11,6 @@ import utils
 #####
 # QUESTION 1.1 : Calcul de la probabilité a priori
 #####
-# ...
-#####
-
 def getPrior(dataframe):
     """
     Calcule la probabilité a priori d'une classe et l'intervalle de confiance à 95%.
@@ -64,8 +61,6 @@ class APrioriClassifier(utils.AbstractClassifier):
     #####
     # QUESTION 1.2.a : Programmation orientée objet dans la hiérarchie des Classifier
     #####
-    # ...
-    #####
     def estimClass(self, attrs):
         """
         À partir d'un dictionnaire d'attributs, estime la classe 0 ou 1
@@ -83,8 +78,6 @@ class APrioriClassifier(utils.AbstractClassifier):
 
     #####
     ## QUESTION 1.2.b : Évaluation de classifieurs
-    #####
-    # ...
     #####
     def statsOnDF(self, dataset):
         """
@@ -135,8 +128,6 @@ class APrioriClassifier(utils.AbstractClassifier):
 #####
 # QUESTION 2.1.a : Probabilités conditionelles
 #####
-# ...
-#####
 def P2D_l(df, attr):
     """
     Calcule la probabilité conditionnelle P(attr | target) pour toutes les valeurs
@@ -180,8 +171,6 @@ def P2D_l(df, attr):
 #####
 # QUESTION 2.1.b : Probabilités conditionelles
 #####
-# ...
-#####
 def P2D_p(df, attr):
     """
     Calcule la probabilité conditionnelle P(target | attr) pour toutes les valeurs
@@ -220,8 +209,6 @@ def P2D_p(df, attr):
 
 #####
 # QUESTION 2.2 : Classifieurs 2D par maximum de vraisemblance
-#####
-# ...
 #####
 class ML2DClassifier(APrioriClassifier):
     """
@@ -296,8 +283,6 @@ class ML2DClassifier(APrioriClassifier):
 
 #####
 # QUESTION 2.3 : Classifieurs 2D par maximum a posteriori
-#####
-# ...
 #####
 class MAP2DClassifier(APrioriClassifier):
     """
@@ -399,3 +384,166 @@ nous estimons qu’il est globalement le plus robuste et fiable pour ce type de 
 Pour ces raisons, nous recommandons le MAP2DClassifier comme la meilleure option dans ce cas.
 '''
 #####
+
+#####
+# QUESTION 3.1 : Complexité en mémoire
+##### 
+def _format_memory(taille):
+    """
+    Formate la taille mémoire en unités lisibles (Go, Mo, Ko, octets).
+
+    Cette fonction décompose une taille donnée (en octets) en unités plus grandes,
+    comme les gigaoctets (Go), mégaoctets (Mo) et kilooctets (Ko), tout en conservant
+    les octets restants. Par exemple, une taille de 12345678 octets sera formatée
+    comme "11Mo 772Ko 470o".
+
+    Parameters
+    ----------
+    taille : int
+        La taille mémoire en octets à formater.
+
+    Returns
+    -------
+    str
+        Une chaîne de caractères représentant la taille décomposée en Go, Mo, Ko, et octets,
+        par ordre décroissant d'unité.
+    
+    Exemple
+    -------
+    >>> _format_memory(12345678)
+    '11Mo 772Ko 470o'
+
+    >>> _format_memory(1025)
+    '1Ko 1o'
+    """
+    unités = [("Go", 1024**3), ("Mo", 1024**2), ("Ko", 1024), ("o", 1)]
+    decomposition = []
+    for unité, facteur in unités:
+        if taille >= facteur:
+            valeur = taille // facteur
+            decomposition.append(f"{valeur}{unité.lower()}")
+            taille %= facteur
+    return " ".join(decomposition)
+
+    
+def nbParams(df, attrs=None):
+    """
+    Calcule et affiche la mémoire nécessaire pour une table P(target | attrs) en Go, Mo, Ko, etc.
+
+    Parameters
+    ----------
+    df : pandas.DataFrame
+        Le DataFrame contenant les données.
+    attrs : list of str, optional
+        Liste des attributs à utiliser avec 'target' pour calculer la mémoire.
+        Si aucun attribut n'est spécifié, tous les attributs seront utilisés.
+
+    Returns
+    -------
+    int
+        Taille en octets nécessaire pour la table.
+    """
+    # Utiliser tous les attributs si aucun n'est spécifié
+    if not attrs:
+        attrs = df.columns.tolist()
+    
+    # Calculer le nombre de combinaisons uniques
+    valeurs_uniques = [len(P2D_p(df, attr)) for attr in attrs]
+    total_combinations = np.prod(valeurs_uniques)
+    
+    # Calculer la mémoire requise (8 octets par combinaison)
+    memoire = int(total_combinations * 8)  # En octets
+
+    # Afficher le résultat formaté
+    if memoire > 1024:
+        print(f"{len(attrs)} variable(s) : {memoire}o = {_format_memory(memoire)}")
+    else:
+        print(f"{len(attrs)} variable(s) : {memoire}o")
+
+    return memoire
+
+#####
+# QUESTION 3.2 : Complexité en mémoire sous hypothèse d'indépendance complète
+##### 
+def nbParamsIndep(df, attrs=None):
+    """
+    Calcule la mémoire nécessaire pour une table P(attrs) sous l'hypothèse d'indépendance
+    des variables, c'est-à-dire P(A, B, C, ...) = P(A) * P(B) * P(C) ...
+
+    Parameters
+    ----------
+    df : pandas.DataFrame
+        Le DataFrame contenant les données.
+    attrs : list of str, optional
+        Liste des attributs pour lesquels on calcule la mémoire.
+        Si aucun attribut n'est spécifié, tous les attributs seront utilisés.
+
+    Returns
+    -------
+    int
+        Taille en octets nécessaire pour les tables indépendantes.
+    """
+    # Utiliser tous les attributs si aucun n'est spécifié
+    if not attrs:
+        attrs = df.columns.tolist()
+    
+    # Calculer la mémoire pour chaque attribut indépendamment
+    memoire = sum(len(P2D_p(df, attr)) * 8 for attr in attrs)
+
+    # Afficher le résultat formaté
+    if memoire > 1024:
+        print(f"{len(attrs)} variable(s) : {memoire}o = {_format_memory(memoire)}")
+    else:
+        print(f"{len(attrs)} variable(s) : {memoire}o")
+
+    return memoire
+
+#####
+# QUESTION 3.3.a. Montrer que P(A,B,C)=P(A)*P(B|A)*P(C|B)
+#####
+'''
+P(A,B,C) = P(A) * P(B,C|A) = P(A) * P(B|A) * P(C|B,A) => Si C et A sont indépendantes => P(A) * P(B|A) * P(C|B)
+'''
+#####
+
+#####
+# QUESTION 3.3.b. Si les 3 variables $A$, $B$ et $C$ ont $5$ valeurs, quelle est la taille mémoire en octet nécessaire pour représenter cette distribution avec et sans l'utilisation de l'indépendance conditionnelle ?
+#####
+'''
+Cas 1 : Sans indépendance conditionnelle
+--------------------------------------------------
+
+On doit stocker toutes les combinaisons possibles de A, B et C. Cela se calcule comme suit :
+  nbCombinaisons = |A| * |B| * |C| = 5 * 5 * 5 = 125
+
+Chaque combinaison occupe 8 octets, donc la mémoire totale nécessaire est :
+  MemTotale = 125 * 8 = 1000 octets
+
+Cas 2 : Avec indépendance conditionnelle partielle
+--------------------------------------------------
+Sous l'hypothèse d'indépendance conditionnelle :
+  P(A, B, C) = P(A) * P(B|A) * P(C|B)
+
+On calcule la mémoire pour représenter chaque composante séparément :
+
+  1. P(A) :
+     - On doit stocker les probabilités de A (5 valeurs).
+     - MemA = 5 * 8 = 40 octets
+  2. P(B|A) :
+     - Pour chaque valeur de A (5 valeurs), on stocke les probabilités de B (5 valeurs).
+     - MemBA = 5 * 5 * 8 = 200 octets
+  3. P(C|B) :
+     - Pour chaque valeur de B (5 valeurs), on stocke les probabilités de C (5 valeurs).
+     - MemCB = 5 * 5 * 8 = 200 octets
+
+Ainsi, la mémoire totale nécessaire est :
+MemTotale = 40 + 200 + 200 = 440 octets
+
+Conclusion :
+L'indépendance conditionnelle partielle réduit significativement la mémoire nécessaire, démontrant une représentation plus efficace pour la distribution P(A, B, C).
+'''
+#####
+
+
+
+

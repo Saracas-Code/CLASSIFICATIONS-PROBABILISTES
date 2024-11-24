@@ -52,3 +52,19 @@ for i in [0,1,2]:
     print("Estimation de la classe de l'individu {} par MAP2DClasssifer) : {}".format(i,cl.estimClass(utils.getNthDict(train,i)))) 
 print("test en apprentissage : {}".format(cl.statsOnDF(train)))
 print("test en validation: {}".format(cl.statsOnDF(test)))
+
+print("Q3.1---------------------------------------------------------------------------------------------------------")
+projet.nbParams(train,['target'])
+projet.nbParams(train,['target','thal'])
+projet.nbParams(train,['target','age'])
+projet.nbParams(train,['target','age','thal','sex','exang'])
+projet.nbParams(train,['target','age','thal','sex','exang','slope','ca','chol'])
+projet.nbParams(train) # seul résultat visible en sortie de cellule
+
+print("Q3.2---------------------------------------------------------------------------------------------------------")
+projet.nbParamsIndep(train[['target']])
+projet.nbParamsIndep(train[['target','thal']])
+projet.nbParamsIndep(train[['target','age']])
+projet.nbParamsIndep(train[['target','age','thal','sex','exang']])
+projet.nbParamsIndep(train[['target','age','thal','sex','exang','slope','ca','chol']])
+projet.nbParamsIndep(train) # seul résultat visible en sortie de cellule
