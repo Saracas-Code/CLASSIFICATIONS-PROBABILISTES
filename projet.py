@@ -4,8 +4,8 @@
 import pandas as pd  # package for high-performance, easy-to-use data structures and data analysis
 import numpy as np  # fundamental package for scientific computing with Python
 import math
-import os
 import utils
+import scipy.stats as stats
 
 
 #####
@@ -830,6 +830,125 @@ class MAPNaiveBayesClassifier(APrioriClassifier):
         probas = self.estimProbas(x)
         return max(probas, key=probas.get)  # Retourne la classe avec la probabilité a posteriori maximale
 
+#####
+# QUESTION 5.1. Voir si un certain attribut est indépendant de target
+#####
+def isIndepFromTarget(df, attr, x):
+    """
+    Détermine si un attribut est indépendant de 'target' selon le test de chi².
+    
+    Parameters
+    ----------
+    df : pandas.DataFrame
+        Le dataframe contenant les données.
+    attr : str
+        Le nom de l'attribut à étudier.
+    x : float
+        Le seuil de signification (p-value).
+
+    Returns
+    -------
+    bool
+        True si l'attribut est indépendant de 'target', False sinon.
+    """
+    # Créer une table de contingence (P(attr, target)) directement avec pandas
+    contingency_table = pd.crosstab(df[attr], df['target'])
+    
+    # Appliquer le test de chi²
+    _, p_value, _, _ = stats.chi2_contingency(contingency_table)
+    
+    # Comparer le p-value avec le seuil
+    return p_value >= x
+
+#####
+# QUESTION 5.2. Classifieurs Reduced
+#####
+class ReducedMLNaiveBayesClassifier(MLNaiveBayesClassifier):
+    """
+    Classifieur Naïve Bayes Reduced basé sur le Maximum de Vraisemblance (ML).
+    Hérite de MLNaiveBayesClassifier.
+    """
+    def __init__(self, dataframe, x):
+        """
+        Initialise le classifieur Naïve Bayes avec les probabilités conditionnelles et a priori.
+
+        Parameters
+        ----------
+        dataframe : pandas.DataFrame
+            Le DataFrame contenant les données d'apprentissage.
+        """
+        super().__init__(dataframe)  # Appel au constructeur de APrioriClassifier
+        # Filtrer les attributs significatifs
+        self.x = x
+        # On ne prend que les attributs qui ne sont pas indépendants avec target
+        self.attrs = [col for col in dataframe.columns if col != 'target' and not isIndepFromTarget(dataframe, col, self.x)]
+        self.cond_probs = {attr: P2D_l(dataframe, attr) for attr in self.attrs}  # P(attrN | target) , N=1...len(attrs)
+
+    def draw(self, obj='target'):
+        """
+        Crée une chaîne de caractères représentant un graphe dirigé où
+        l'objet `obj` est connecté à tous les autres attributs.
+
+        Parameters
+        ----------
+        obj : str
+            Le nom de l'objet central du graphe (par défaut 'target').
+
+        Returns
+        -------
+        str
+            Une représentation graphique sous forme de chaîne de caractères.
+        """
+        # Créer les arêtes (obj -> chaque attribut sauf obj)
+        edges = [f"{obj}->{attr};" for attr in self.attrs if attr != obj]
+    
+        # Générer la chaîne et la dessiner avec utils.drawGraph
+        graph_string = "".join(edges)
+        return utils.drawGraph(graph_string)
 
 
+class ReducedMAPNaiveBayesClassifier(MAPNaiveBayesClassifier):
+    """
+    Classifieur Naïve Bayes Reduced basé sur le Maximum A Posteriori (MAP).
+    Hérite de MAPNaiveBayesClassifier.
+    """
+    def __init__(self, dataframe, x):
+        """
+        Initialise le classifieur Naïve Bayes avec les probabilités conditionnelles
+        et les probabilités a priori P(target).
+
+        Parameters
+        ----------
+        dataframe : pandas.DataFrame
+            Le DataFrame contenant les données d'apprentissage.
+        """
+        super().__init__(dataframe)  # Appel au constructeur de APrioriClassifier
+        self.x = x 
+        # On ne prend que les attributs qui ne sont pas indépendants avec target
+        self.attrs = [col for col in dataframe.columns if col != 'target' and not isIndepFromTarget(dataframe, col, self.x)]
+
+        # Calcul des probabilités conditionnelles P(attr | target)
+        self.cond_probs = {attr: P2D_l(dataframe, attr) for attr in self.attrs}
+
+    def draw(self, obj='target'):
+        """
+        Crée une chaîne de caractères représentant un graphe dirigé où
+        l'objet `obj` est connecté à tous les autres attributs.
+
+        Parameters
+        ----------
+        obj : str
+            Le nom de l'objet central du graphe (par défaut 'target').
+
+        Returns
+        -------
+        str
+            Une représentation graphique sous forme de chaîne de caractères.
+        """
+        # Créer les arêtes (obj -> chaque attribut sauf obj)
+        edges = [f"{obj}->{attr};" for attr in self.attrs if attr != obj]
+    
+        # Générer la chaîne et la dessiner avec utils.drawGraph
+        graph_string = "".join(edges)
+        return utils.drawGraph(graph_string)
 

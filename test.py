@@ -98,3 +98,39 @@ for i in [0,1,2]:
     print("------")
 print(f"test en apprentissage : {cl.statsOnDF(train)}")
 print(f"test en validation    : {cl.statsOnDF(test)}")
+
+print("Q5.1---------------------------------------------------------------------------------------------------------")
+for attr in train.keys():
+    if attr!='target':
+        print(f"target independant de {attr} ? {'YES' if projet.isIndepFromTarget(train,attr,0.01) else 'no'}")
+    
+print("Q5.2---------------------------------------------------------------------------------------------------------")
+cl=projet.ReducedMLNaiveBayesClassifier(train,0.05)
+cl.draw()
+
+for i in [0,1,2]:
+    print(f"Estimation de la proba de l'individu {i} par ReducedMLNaiveBayesClassifier : {cl.estimProbas(utils.getNthDict(train,i))}")
+    print(f"Estimation de la classe de l'individu {i} par ReducedMLNaiveBayesClassifier : {cl.estimClass(utils.getNthDict(train,i))}") 
+    print("------")
+print(f"test en apprentissage : {cl.statsOnDF(train)}")
+print(f"test en validation    : {cl.statsOnDF(test)}")
+
+cl=projet.ReducedMLNaiveBayesClassifier(train,0.01)
+cl.draw()
+
+for i in [0,1,2]:
+    print(f"Estimation de la proba de l'individu {i} par ReducedMLNaiveBayesClassifier : {cl.estimProbas(utils.getNthDict(train,i))}")
+    print(f"Estimation de la classe de l'individu {i} par ReducedMLNaiveBayesClassifier : {cl.estimClass(utils.getNthDict(train,i))}") 
+    print("------")
+print(f"test en apprentissage : {cl.statsOnDF(train)}")
+print(f"test en validation    : {cl.statsOnDF(test)}")
+
+cl=projet.ReducedMAPNaiveBayesClassifier(train,0.01)
+cl.draw()
+
+for i in [0,1,2]:
+    print(f"Estimation de la proba de l'individu {i} par ReducedMAPNaiveBayesClassifier : {cl.estimProbas(utils.getNthDict(train,i))}")
+    print(f"Estimation de la classe de l'individu {i} par ReducedMAPNaiveBayesClassifier : {cl.estimClass(utils.getNthDict(train,i))}") 
+    print("------")
+print(f"test en apprentissage : {cl.statsOnDF(train)}")
+print(f"test en validation    : {cl.statsOnDF(test)}")
