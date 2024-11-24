@@ -55,8 +55,8 @@ class APrioriClassifier(utils.AbstractClassifier):
         dataframe : pandas.DataFrame
             Le DataFrame contenant les données avec une colonne 'target'.
         """
-        prior = getPrior(dataframe)
-        self.majority_class = 1 if prior['estimation'] > 0.5 else 0  # Classe majoritaire
+        self.prior = getPrior(dataframe)
+        self.majority_class = 1 if self.prior['estimation'] > 0.5 else 0  # Classe majoritaire
 
     #####
     # QUESTION 1.2.a : Programmation orientée objet dans la hiérarchie des Classifier
@@ -507,7 +507,7 @@ P(A,B,C) = P(A) * P(B,C|A) = P(A) * P(B|A) * P(C|B,A) => Si C et A sont indépen
 #####
 
 #####
-# QUESTION 3.3.b. Si les 3 variables $A$, $B$ et $C$ ont $5$ valeurs, quelle est la taille mémoire en octet nécessaire pour représenter cette distribution avec et sans l'utilisation de l'indépendance conditionnelle ?
+# QUESTION 3.3.b. Si les 3 variables A, B et C ont 5 valeurs, quelle est la taille mémoire en octet nécessaire pour représenter cette distribution avec et sans l'utilisation de l'indépendance conditionnelle ?
 #####
 '''
 Cas 1 : Sans indépendance conditionnelle
@@ -543,6 +543,292 @@ Conclusion :
 L'indépendance conditionnelle partielle réduit significativement la mémoire nécessaire, démontrant une représentation plus efficace pour la distribution P(A, B, C).
 '''
 #####
+
+#####
+# QUESTION 4.1. Exemples #### RÉVISER ####
+#####
+'''
+Cas 1
+-------------------------------------------------------------
+Si les 5 variables sont totalement indépendantes, cela signifie que :
+P(A, B, C, D, E) = P(A) ⋅ P(B) ⋅ P(C) ⋅ P(D) ⋅ P(E)
+
+Cela pourrait être représenté par un graphe où aucun sommet n'a de parent.
+Autrement dit, le graphe résultant serait un graphe sans arêtes (graphe nul ou vide).
+
+Cas 2
+-------------------------------------------------------------
+Si les variables ne sont pas indépendantes entre elles, cela signifie que :
+P(A, B, C, D, E) = P(A) ⋅ P(B|A) ⋅ P(C|A, B) ⋅ P(D|A, B, C) ⋅ P(E|A, B, C, D)
+Le graphe résultant sera un graphe orienté complet.
+Cela signifie que chaque sommet a une flèche dirigée vers tous les autres sommets.
+'''
+#####
+
+#####
+# QUESTION 4.2. Naïve Bayes 
+#####
+'''
+
+Cas 1 : Décomposition de la vraisemblance
+-----------------------------------------------------------------------------
+P(attr1, attr2, attr3, ..., attrN | target) = P(attr1 | target) * P(attr2 | target) * P(attr3 | target) * ... * P(attrN | target)
+
+Grâce à l'hypothèse d'indépendance conditionnelle, la probabilité conjointe des attributs conditionnée à la variable cible 
+est simplifiée en un produit des probabilités conditionnelles de chaque attribut.
+
+Cas 2 : Décomposition de la distribution à posteriori
+-----------------------------------------------------------------------------
+La probabilité a posteriori est calculée grâce au théorème de Bayes, qui s'écrit comme suit :
+P(target | attr1, attr2, ..., attrN) = P(attr1, attr2, ..., attrN | target) * P(target) / P(attr1, attr2, ..., attrN)
+
+En utilisant l'hypothèse de Naïve Bayes (indépendance conditionnelle des attributs), la vraisemblance peut être réécrite comme : 
+P(attr1, attr2, ..., attrN | target) = P(attr1 | target) * P(attr2 | target) * ... * P(attrN | target)
+
+Ainsi, la probabilité a posteriori devient :
+P(target | attr1, attr2, ..., attrN) ∝ P(target) * P(attr1 | target) * P(attr2 | target) * ... * P(attrN | target)
+'''
+
+#####
+# QUESTION 4.3.a. Modèle graphique et naïve bayes
+#####
+def drawNaiveBayes(df, obj="target") :
+    """
+    Dessine le modèle graphique de Naïve Bayes basé sur un DataFrame.
+
+    Cette fonction génère un graphe orienté où le nœud cible (`obj`) est connecté par des flèches 
+    à tous les autres attributs du DataFrame, suivant le modèle graphique de Naïve Bayes. 
+    Dans ce modèle, tous les attributs sont supposés indépendants conditionnellement à la cible (`obj`).
+
+    Parameters
+    ----------
+    df : pandas.DataFrame
+        Le DataFrame contenant les colonnes représentant les attributs et la cible.
+    obj : str, optionnel
+        Le nom de la colonne représentant la cible (par défaut "target").
+
+    Returns
+    -------
+    Image
+        L'image du graphe générée par la bibliothèque `utils.drawGraph`.
+    """
+    attrs = [attr for attr in df.columns if attr != obj]  # On ne prend pas en compte le target
+    graph = ";".join([f"{obj}->{attr}" for attr in attrs])  # On construit les conexiones
+
+    return utils.drawGraph(graph)
+
+#####
+# QUESTION 4.3.b. Modèle graphique et naïve bayes
+#####
+def nbParamsNaiveBayes(df, obj="target", attrs=None):
+    """
+    Calcule et affiche la mémoire nécessaire pour les tables P(target | attr)
+    en utilisant l'hypothèse de Naïve Bayes (indépendance conditionnelle des attributs).
+
+    Cette fonction calcule la taille mémoire totale en tenant compte des combinaisons possibles
+    entre les valeurs de la cible (target) et les attributs fournis. Un ajustement de -16 octets
+    est appliqué pour éviter de doubler la mémoire pour P(target), déjà incluse dans les tables
+    P(target | attr).
+
+    Parameters
+    ----------
+    df : pandas.DataFrame
+        Le DataFrame contenant les données.
+    obj : str, optional
+        La colonne représentant la cible (par défaut "target").
+    attrs : list of str, optional
+        Liste des attributs à utiliser pour calculer la mémoire.
+        Si aucun attribut n'est spécifié, toutes les colonnes sont utilisées.
+
+    Returns
+    -------
+    int
+        Taille totale en octets nécessaire pour les tables.
+    """
+    # Exclure la colonne cible si attrs n'est pas spécifié
+    if attrs is None:
+        attrs = [col for col in df.columns]
+
+    # Calculer la mémoire totale
+    if len(attrs) == 0:
+        memoire_totale = 16  # target=1 ; target=0
+    else:
+        memoire_totale = 0  
+        for attr in attrs:
+            nb_valeurs_target = df[obj].nunique()  # Nombre de valeurs uniques dans target
+            nb_valeurs_attr = df[attr].nunique()   # Nombre de valeurs uniques dans l'attribut
+            memoire_table = nb_valeurs_target * nb_valeurs_attr
+            memoire_totale += memoire_table
+        
+        # Conversion en octets et ajustement pour éviter de doubler P(target)
+        memoire_totale = memoire_totale * 8 - 16
+
+    # Afficher le résultat formaté (octets, Ko, Mo, etc.)
+    if memoire_totale > 1024:
+        print(f"{len(attrs)} variable(s) : {memoire_totale}o = {_format_memory(memoire_totale)}")
+    else:
+        print(f"{len(attrs)} variable(s) : {memoire_totale}o")
+    return memoire_totale
+
+#####
+# QUESTION 4.4. Classifieur naïve bayes
+#####
+class MLNaiveBayesClassifier(APrioriClassifier):
+    """
+    Classifieur Naïve Bayes basé sur le Maximum de Vraisemblance (ML).
+    Hérite de APrioriClassifier.
+    """
+    def __init__(self, dataframe):
+        """
+        Initialise le classifieur Naïve Bayes avec les probabilités conditionnelles et a priori.
+
+        Parameters
+        ----------
+        dataframe : pandas.DataFrame
+            Le DataFrame contenant les données d'apprentissage.
+        """
+        super().__init__(dataframe)  # Appel au constructeur de APrioriClassifier
+        self.attrs = [col for col in dataframe.columns if col != 'target'] # On prend tous les attributs
+        self.cond_probs = {attr: P2D_l(dataframe, attr) for attr in self.attrs}  # P(attrN | target) , N=1...len(attrs)
+
+    def estimProbas(self, x):
+        """
+        Calcule les vraisemblances P(attr1, attr2, ..., attrN | target).
+
+        Parameters
+        ----------
+        x : dict
+            Un dictionnaire représentant un individu (attr1: val1, attr2: val2, ...).
+
+        Returns
+        -------
+        dict
+            Un dictionnaire contenant les vraisemblances pour les classes cible 0 et 1.
+        """
+        # Initialiser les résultats pour les deux classes cibles
+        result1 = 1  # Pour target=0
+        result2 = 1  # Pour target=1
+
+        # Parcourir les attributs
+        for attr in self.attrs:
+            attr_value = x.get(attr, None)  # Récupérer la valeur de l'attribut dans x
+
+            # Calculer pour target=0
+            if attr_value in self.cond_probs[attr][0]:
+                result1 *= self.cond_probs[attr][0][attr_value]
+            else:
+                result1 *= 0  # Probabilité nulle si la valeur n'est pas présente
+
+            # Calculer pour target=1
+            if attr_value in self.cond_probs[attr][1]:
+                result2 *= self.cond_probs[attr][1][attr_value]
+            else:
+                result2 *= 0  # Probabilité nulle si la valeur n'est pas présente
+
+        # Retourner les résultats sous forme de dictionnaire
+        return {0: result1, 1: result2}
+
+
+    def estimClass(self, x):
+        """
+        Estime la classe d'un individu en utilisant les vraisemblances (ML).
+
+        Parameters
+        ----------
+        x : dict
+            Un dictionnaire représentant un individu.
+
+        Returns
+        -------
+        object
+            La classe estimée (valeur de target).
+        """
+        probas = self.estimProbas(x)
+        return max(probas, key=probas.get)  # Retourne la classe avec la vraisemblance maximale
+
+class MAPNaiveBayesClassifier(APrioriClassifier):
+    """
+    Classifieur Naïve Bayes basé sur le Maximum A Posteriori (MAP).
+    Hérite de APrioriClassifier.
+    """
+    def __init__(self, dataframe):
+        """
+        Initialise le classifieur Naïve Bayes avec les probabilités conditionnelles
+        et les probabilités a priori P(target).
+
+        Parameters
+        ----------
+        dataframe : pandas.DataFrame
+            Le DataFrame contenant les données d'apprentissage.
+        """
+        super().__init__(dataframe)  # Appel au constructeur de APrioriClassifier
+        self.df = dataframe
+        self.attrs = [col for col in dataframe.columns if col != 'target']  # On prend tous les attributs
+
+        # Calcul des probabilités conditionnelles P(attr | target)
+        self.cond_probs = {attr: P2D_l(dataframe, attr) for attr in self.attrs}
+
+        # Calcul des probabilités a priori P(target)
+        self.prior_probs = {
+            0: 1 - self.prior['estimation'],  # P(target=0)
+            1: self.prior['estimation']       # P(target=1)
+        }
+
+    def estimProbas(self, x):
+        """
+        Calcule les probabilités a posteriori P(target | attr1, attr2, ..., attrN).
+
+        Parameters
+        ----------
+        x : dict
+            Un dictionnaire représentant un individu (attr1: val1, attr2: val2, ...).
+
+        Returns
+        -------
+        dict
+            Un dictionnaire contenant les probabilités a posteriori pour chaque classe cible.
+        """
+        # Estimer P(attrs | target) pour chaque classe
+        result1 = 1  # Pour target=0
+        result2 = 1  # Pour target=1
+
+        for attr in self.attrs:
+            attr_value = x.get(attr, None)
+            if attr_value in self.cond_probs[attr][0]:
+                result1 *= self.cond_probs[attr][0][attr_value]
+            else:
+                result1 *= 0
+
+            if attr_value in self.cond_probs[attr][1]:
+                result2 *= self.cond_probs[attr][1][attr_value]
+            else:
+                result2 *= 0
+
+        # Ajouter les probabilités a priori
+        p = self.prior_probs.get(1, 0)  # P(target=1)
+        s = result1 * (1 - p) + result2 * p  # Dénominateur de normalisation
+
+        if s != 0:
+            return {0: result1 * (1 - p) / s, 1: result2 * p / s}
+        return {0: 0, 1: 0}
+
+
+    def estimClass(self, x):
+        """
+        Estime la classe d'un individu en utilisant les probabilités a posteriori (MAP).
+
+        Parameters
+        ----------
+        x : dict
+            Un dictionnaire représentant un individu.
+
+        Returns
+        -------
+        object
+            La classe estimée (valeur de target).
+        """
+        probas = self.estimProbas(x)
+        return max(probas, key=probas.get)  # Retourne la classe avec la probabilité a posteriori maximale
 
 
 

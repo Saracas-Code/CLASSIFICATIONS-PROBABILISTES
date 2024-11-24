@@ -68,3 +68,33 @@ projet.nbParamsIndep(train[['target','age']])
 projet.nbParamsIndep(train[['target','age','thal','sex','exang']])
 projet.nbParamsIndep(train[['target','age','thal','sex','exang','slope','ca','chol']])
 projet.nbParamsIndep(train) # seul résultat visible en sortie de cellule
+
+print("Q4.3.a---------------------------------------------------------------------------------------------------------")
+projet.drawNaiveBayes(train,"target")
+
+print("Q4.3.b---------------------------------------------------------------------------------------------------------")
+projet.nbParamsNaiveBayes(train,'target',[])
+projet.nbParamsNaiveBayes(train,'target',['target','thal'])
+projet.nbParamsNaiveBayes(train,'target',['target','age'])
+projet.nbParamsNaiveBayes(train,'target',['target','age','thal','sex','exang'])
+projet.nbParamsNaiveBayes(train,'target',['target','age','thal','sex','exang','slope','ca','chol'])
+projet.nbParamsNaiveBayes(train,'target') # seul résultat visible en sortie de cellule
+
+print("Q4.4---------------------------------------------------------------------------------------------------------")
+cl=projet.MLNaiveBayesClassifier(train)
+
+for i in [0,1,2]:
+    print(f"Estimation de la proba de l'individu {i} par MLNaiveBayesClassifier : {cl.estimProbas(utils.getNthDict(train,i))}")
+    print(f"Estimation de la classe de l'individu {i} par MLNaiveBayesClassifier : {cl.estimClass(utils.getNthDict(train,i))}") 
+    print("------")
+print(f"test en apprentissage : {cl.statsOnDF(train)}")
+print(f"test en validation    : {cl.statsOnDF(test)}")
+
+cl=projet.MAPNaiveBayesClassifier(train)
+
+for i in [0,1,2]:
+    print(f"Estimation de la proba de l'individu {i} par MLNaiveBayesClassifier : {cl.estimProbas(utils.getNthDict(train,i))}")
+    print(f"Estimation de la classe de l'individu {i} par MLNaiveBayesClassifier : {cl.estimClass(utils.getNthDict(train,i))}") 
+    print("------")
+print(f"test en apprentissage : {cl.statsOnDF(train)}")
+print(f"test en validation    : {cl.statsOnDF(test)}")
