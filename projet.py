@@ -39,7 +39,9 @@ def getPrior(dataframe):
         'max5pourcent': float(borne_sup)
     }
 
-
+#####
+# QUESTION 1.2 : Programmation orientée objet dans la hiérarchie des Classifier
+#####
 class APrioriClassifier(utils.AbstractClassifier):
     """
     Classifieur a priori basé sur la classe majoritaire.
@@ -59,7 +61,7 @@ class APrioriClassifier(utils.AbstractClassifier):
         self.majority_class = 1 if self.prior['estimation'] > 0.5 else 0  # Classe majoritaire
 
     #####
-    # QUESTION 1.2.a : Programmation orientée objet dans la hiérarchie des Classifier
+    # QUESTION 1.2.a : Estimer la classe majoritaire
     #####
     def estimClass(self, attrs):
         """
@@ -123,8 +125,6 @@ class APrioriClassifier(utils.AbstractClassifier):
             'Rappel': round(rappel, 16)
         }
 
-
-
 #####
 # QUESTION 2.1.a : Probabilités conditionelles
 #####
@@ -166,7 +166,6 @@ def P2D_l(df, attr):
             p[valeur_target_int][valeur_attribut_int] = prob  # ajout au dictionnaire
 
     return p
-
 
 #####
 # QUESTION 2.1.b : Probabilités conditionelles
@@ -671,7 +670,7 @@ def nbParamsNaiveBayes(df, obj="target", attrs=None):
     return memoire_totale
 
 #####
-# QUESTION 4.4. Classifieur naïve bayes
+# QUESTION 4.4. Classifieurs Naïve Bayes
 #####
 class MLNaiveBayesClassifier(APrioriClassifier):
     """
@@ -861,7 +860,7 @@ def isIndepFromTarget(df, attr, x):
     return p_value >= x
 
 #####
-# QUESTION 5.2. Classifieurs Reduced
+# QUESTION 5.2. Classifieurs Naïve Bayes Reduced
 #####
 class ReducedMLNaiveBayesClassifier(MLNaiveBayesClassifier):
     """
@@ -905,7 +904,6 @@ class ReducedMLNaiveBayesClassifier(MLNaiveBayesClassifier):
         # Générer la chaîne et la dessiner avec utils.drawGraph
         graph_string = "".join(edges)
         return utils.drawGraph(graph_string)
-
 
 class ReducedMAPNaiveBayesClassifier(MAPNaiveBayesClassifier):
     """
