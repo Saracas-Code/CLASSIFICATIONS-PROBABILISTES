@@ -134,3 +134,22 @@ for i in [0,1,2]:
     print("------")
 print(f"test en apprentissage : {cl.statsOnDF(train)}")
 print(f"test en validation    : {cl.statsOnDF(test)}")
+
+print("Q6.2---------------------------------------------------------------------------------------------------------")
+projet.mapClassifiers({"1":projet.APrioriClassifier(train),
+                "2":projet.ML2DClassifier(train,"exang"),
+                "3":projet.MAP2DClassifier(train,"exang"),
+                "4":projet.MAPNaiveBayesClassifier(train),
+                "5":projet.MLNaiveBayesClassifier(train),
+                "6":projet.ReducedMAPNaiveBayesClassifier(train,0.01),
+                "7":projet.ReducedMLNaiveBayesClassifier(train,0.01),
+                },train)
+
+projet.mapClassifiers({"1":projet.APrioriClassifier(train),
+                "2":projet.ML2DClassifier(train,"exang"),
+                "3":projet.MAP2DClassifier(train,"exang"),
+                "4":projet.MAPNaiveBayesClassifier(train),
+                "5":projet.MLNaiveBayesClassifier(train),
+                "6":projet.ReducedMAPNaiveBayesClassifier(train,0.01),
+                "7":projet.ReducedMLNaiveBayesClassifier(train,0.01),
+                },test)

@@ -6,6 +6,7 @@ import numpy as np  # fundamental package for scientific computing with Python
 import math
 import utils
 import scipy.stats as stats
+import matplotlib.pyplot as plt
 
 
 #####
@@ -424,7 +425,6 @@ def _format_memory(taille):
             taille %= facteur
     return " ".join(decomposition)
 
-    
 def nbParams(df, attrs=None):
     """
     Calcule et affiche la mémoire nécessaire pour une table P(target | attrs) en Go, Mo, Ko, etc.
@@ -950,3 +950,98 @@ class ReducedMAPNaiveBayesClassifier(MAPNaiveBayesClassifier):
         graph_string = "".join(edges)
         return utils.drawGraph(graph_string)
 
+#####
+# QUESTION 6.1. ON DOIT LA FAIRE
+#####
+# ...
+
+#####
+# QUESTION 6.2. Représentation graphique
+#####
+def mapClassifiers(dic, df): 
+    """
+    Trace une représentation graphique des classificateurs en termes de précision et rappel.
+
+    Cette fonction calcule les métriques de précision et de rappel pour chaque classificateur
+    contenu dans le dictionnaire fourni, puis affiche ces métriques sur un graphique avec des
+    limites calculées dynamiquement.
+
+    Parameters
+    ----------
+    dic : dict
+        Un dictionnaire où les clés sont des noms de classificateurs (str) et les valeurs sont des
+        instances de classificateurs capables de fournir des statistiques.
+    df : pandas.DataFrame
+        Le dataframe contenant les données sur lesquelles évaluer les classificateurs.
+
+    Returns
+    -------
+    None
+        Cette fonction n'a pas de retour mais affiche un graphique représentant les performances
+        des classificateurs.
+    """
+    # Initialisation des listes pour stocker les résultats
+    results = []
+    precisions = []
+    recalls = []
+    
+    # Parcourir chaque classificateur dans le dictionnaire
+    for name, classifier in dic.items():
+        # Obtenir les statistiques de précision et de rappel
+        stats = classifier.statsOnDF(df)  # On suppose que statsOnDF retourne un dictionnaire avec 'Précision' et 'Rappel'
+        precision = stats['Précision']
+        recall = stats['Rappel']
+        # Ajouter les résultats au tableau
+        results.append((name, precision, recall))
+        precisions.append(precision)
+        recalls.append(recall)
+    
+    # Calculer les limites des axes avec une marge
+    x_min = min(precisions) - 0.02  # Limite minimale pour l'axe X (avec une marge de 0.02)
+    x_max = max(precisions) + 0.02  # Limite maximale pour l'axe X (avec une marge de 0.02)
+    y_min = min(recalls) - 0.02  # Limite minimale pour l'axe Y (avec une marge de 0.02)
+    y_max = max(recalls) + 0.02  # Limite maximale pour l'axe Y (avec une marge de 0.02)
+
+    # Configurer la figure avec constrained_layout pour un ajustement automatique
+    plt.figure(figsize=(6, 6), facecolor='lightgray', constrained_layout=True)  # Fond gris clair avec ajustement
+
+    # Tracer les points pour chaque classificateur
+    for name, precision, recall in results:
+        plt.scatter(precision, recall, color='red', marker='x', s=70)  # Points en forme de croix
+        plt.text(precision + 0.003, recall - 0.003, name, fontsize=9, color='black')  # Étiquettes près des points
+
+    # Ajouter des lignes de référence pour les axes
+    plt.axhline(1.0, color='gray', linestyle='--', linewidth=0.8, alpha=0.7)
+    plt.axvline(1.0, color='gray', linestyle='--', linewidth=0.8, alpha=0.7)
+
+    # Configurer les titres et étiquettes
+    plt.title("Evaluation des Classifieurs (Précision vs. Rappel)", fontsize=14, pad=10)
+    plt.xlabel("Précision", fontsize=12, labelpad=5)
+    plt.ylabel("Rappel", fontsize=12, labelpad=5)
+
+    # Définir les limites dynamiques pour les axes
+    plt.xlim(x_min, x_max)
+    plt.ylim(y_min, y_max)
+
+    # Personnaliser les bordures ("spines")
+    ax = plt.gca()  # Obtenir l'objet des axes courants
+    ax.spines['top'].set_linewidth(1)  # Épaisseur de la bordure supérieure
+    ax.spines['right'].set_linewidth(1)  # Épaisseur de la bordure droite
+    ax.spines['bottom'].set_linewidth(1)  # Épaisseur de la bordure inférieure
+    ax.spines['left'].set_linewidth(1)  # Épaisseur de la bordure gauche
+    ax.spines['top'].set_color('black')  # Couleur de la bordure supérieure
+    ax.spines['right'].set_color('black')  # Couleur de la bordure droite
+    ax.spines['bottom'].set_color('black')  # Couleur de la bordure inférieure
+    ax.spines['left'].set_color('black')  # Couleur de la bordure gauche
+
+    # Désactiver la grille
+    plt.grid(False)
+
+    # Afficher le graphique
+    plt.show()
+
+
+#####
+# QUESTION 6.3. ON DOIT LA FAIRE
+#####
+# ...
