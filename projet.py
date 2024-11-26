@@ -926,8 +926,10 @@ class ReducedMAPNaiveBayesClassifier(MAPNaiveBayesClassifier):
 #####
 # QUESTION 6.1. ON DOIT LA FAIRE
 #####
-# ...
-
+# Le point idéal se situe à (1,1).
+# Une Précision P = 1 signifique qu'il n'y a pas de faux positif et un rappel R = 1 signifie qu'il n'y a pas de faux négatif.
+# Donc le classifieur détecte tous les cas positifs sans aucune erreur.
+# Pour comparer les classifieurs entre eux, on peut calculer les distances horizontales et verticales du point par rapport au point idéal (1,1). 
 #####
 # QUESTION 6.2. Représentation graphique
 #####
