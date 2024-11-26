@@ -228,7 +228,7 @@ class ML2DClassifier(APrioriClassifier):
         attr_column : str
             Le nom de l'attribut utilisé pour construire la table P2D.
         """
-        super().__init__(dataframe)  # Initialise la classe parent
+        super().__init__(dataframe)  
         self.attr_column = attr_column
         self.table_P2D = self._construct_P2D(dataframe, attr_column)
 
@@ -302,7 +302,7 @@ class MAP2DClassifier(APrioriClassifier):
         attr_column : str
             Le nom de l'attribut utilisé pour construire la table P2Dp.
         """
-        super().__init__(dataframe)  # Initialise la classe parent
+        super().__init__(dataframe)  
         self.attr_column = attr_column
         self.table_P2Dp = self._construct_P2Dp(dataframe, attr_column)
 
@@ -339,50 +339,41 @@ class MAP2DClassifier(APrioriClassifier):
         int
             La classe estimée (0 ou 1) en fonction de la probabilité conditionnelle calculée.
         """
-        # Récupérer la valeur de l'attribut correspondant à attr_column
         value = individual[self.attr_column]
-
-        # Initialiser un dictionnaire pour stocker les probabilités par classe
         target_probs = {}
 
-        # Parcourir les classes dans table_P2Dp (0 et 1)
         for target in self.table_P2Dp[value]:
-            # Récupérer la probabilité conditionnelle associée à la valeur de l'attribut
             target_probs[target] = self.table_P2Dp[value][target]
 
-        # Retourner la classe avec la probabilité maximale
-        # En cas d'égalité, retourne 0 comme spécifié dans l'énoncé
-        return max(target_probs, key=lambda t: (target_probs[t], -t))  # Priorité à 0 en cas d'égalité
+        return max(target_probs, key=lambda t: (target_probs[t], -t))  
     
 #####
 # QUESTION 2.4 : Comparaison
 ##### 
-'''
-Avant d’exprimer notre opinion, nous tenons à souligner que les meilleures mesures de prédiction 
-peuvent varier en fonction du contexte dans lequel elles sont utilisées. Il est donc essentiel 
-d’évaluer chaque cas avec soin afin de parvenir à une conclusion adaptée. 
-
-Dans ce problème, l’objectif est de prédire si une personne est malade (target = 1) ou en bonne santé 
-(target = 0) en utilisant des attributs individuels comme l’âge, le sexe, et d’autres caractéristiques. 
-
-Parmi les classifieurs développés, le classifieur a priori (APrioriClassifier) est le plus simple, 
-car il prédit toujours la classe majoritaire du jeu de données. Sa précision dépend uniquement de la proportion 
-de la classe majoritaire dans l’échantillon, ce qui serait acceptable s’il existait une nette majorité dans les classes. 
-Cependant, ce n’est pas le cas ici, car l’équilibre entre les classes n’est pas suffisamment marqué, 
-ce qui limite considérablement son utilité. 
-
-En revanche, le classifieur par maximum de vraisemblance (ML2DClassifier) améliore significativement 
-les performances en prenant en compte les probabilités conditionnelles P(attr∣target), atteignant une bonne 
-précision dans notre contexte. Toutefois, il ne tient pas compte des proportions globales des classes, ce qui peut 
-poser problème dans des jeux de données déséquilibrés. 
-
-Enfin, le classifieur par maximum à posteriori (MAP2DClassifier) combine les probabilités conditionnelles 
-avec les proportions globales des classes, ce qui lui permet de mieux gérer des scénarios réels où les classes sont souvent 
-déséquilibrées. Bien qu’il puisse avoir une précision légèrement inférieure à celle du classifieur précédent, 
-nous estimons qu’il est globalement le plus robuste et fiable pour ce type de problème. 
-
-Pour ces raisons, nous recommandons le MAP2DClassifier comme la meilleure option dans ce cas.
-'''
+#Avant d’exprimer notre opinion, nous tenons à souligner que les meilleures mesures de prédiction 
+#peuvent varier en fonction du contexte dans lequel elles sont utilisées. Il est donc essentiel 
+#d’évaluer chaque cas avec soin afin de parvenir à une conclusion adaptée. 
+#
+#Dans ce problème, l’objectif est de prédire si une personne est malade (target = 1) ou en bonne santé 
+#(target = 0) en utilisant des attributs individuels comme l’âge, le sexe, et d’autres caractéristiques. 
+#
+#Parmi les classifieurs développés, le classifieur a priori (APrioriClassifier) est le plus simple, 
+#car il prédit toujours la classe majoritaire du jeu de données. Sa précision dépend uniquement de la proportion 
+#de la classe majoritaire dans l’échantillon, ce qui serait acceptable s’il existait une nette majorité dans les classes. 
+#Cependant, ce n’est pas le cas ici, car l’équilibre entre les classes n’est pas suffisamment marqué, 
+#ce qui limite considérablement son utilité. 
+#
+#En revanche, le classifieur par maximum de vraisemblance (ML2DClassifier) améliore significativement 
+#les performances en prenant en compte les probabilités conditionnelles P(attr∣target), atteignant une bonne 
+#précision dans notre contexte. Toutefois, il ne tient pas compte des proportions globales des classes, ce qui peut 
+#poser problème dans des jeux de données déséquilibrés. 
+#
+#Enfin, le classifieur par maximum à posteriori (MAP2DClassifier) combine les probabilités conditionnelles 
+#avec les proportions globales des classes, ce qui lui permet de mieux gérer des scénarios réels où les classes sont souvent 
+#déséquilibrées. Bien qu’il puisse avoir une précision légèrement inférieure à celle du classifieur précédent, 
+#nous estimons qu’il est globalement le plus robuste et fiable pour ce type de problème. 
+#
+#Pour ces raisons, nous recommandons le MAP2DClassifier comme la meilleure option dans ce cas.
 #####
 
 #####
@@ -446,14 +437,11 @@ def nbParams(df, attrs=None):
     if not attrs:
         attrs = df.columns.tolist()
     
-    # Calculer le nombre de combinaisons uniques
     valeurs_uniques = [len(P2D_p(df, attr)) for attr in attrs]
     total_combinations = np.prod(valeurs_uniques)
     
-    # Calculer la mémoire requise (8 octets par combinaison)
     memoire = int(total_combinations * 8)  # En octets
 
-    # Afficher le résultat formaté
     if memoire > 1024:
         print(f"{len(attrs)} variable(s) : {memoire}o = {_format_memory(memoire)}")
     else:
@@ -489,7 +477,6 @@ def nbParamsIndep(df, attrs=None):
     # Calculer la mémoire pour chaque attribut indépendamment
     memoire = sum(len(P2D_p(df, attr)) * 8 for attr in attrs)
 
-    # Afficher le résultat formaté
     if memoire > 1024:
         print(f"{len(attrs)} variable(s) : {memoire}o = {_format_memory(memoire)}")
     else:
@@ -500,47 +487,42 @@ def nbParamsIndep(df, attrs=None):
 #####
 # QUESTION 3.3.a. Montrer que P(A,B,C)=P(A)*P(B|A)*P(C|B)
 #####
-'''
-P(A,B,C) = P(A) * P(B,C|A) = P(A) * P(B|A) * P(C|B,A) => Si C et A sont indépendantes => P(A) * P(B|A) * P(C|B)
-'''
+#P(A,B,C) = P(A) * P(B,C|A) = P(A) * P(B|A) * P(C|B,A) => Si C et A sont indépendantes => P(A) * P(B|A) * P(C|B)
 #####
-
 #####
 # QUESTION 3.3.b. Si les 3 variables A, B et C ont 5 valeurs, quelle est la taille mémoire en octet nécessaire pour représenter cette distribution avec et sans l'utilisation de l'indépendance conditionnelle ?
 #####
-'''
-Cas 1 : Sans indépendance conditionnelle
---------------------------------------------------
-
-On doit stocker toutes les combinaisons possibles de A, B et C. Cela se calcule comme suit :
-  nbCombinaisons = |A| * |B| * |C| = 5 * 5 * 5 = 125
-
-Chaque combinaison occupe 8 octets, donc la mémoire totale nécessaire est :
-  MemTotale = 125 * 8 = 1000 octets
-
-Cas 2 : Avec indépendance conditionnelle partielle
---------------------------------------------------
-Sous l'hypothèse d'indépendance conditionnelle :
-  P(A, B, C) = P(A) * P(B|A) * P(C|B)
-
-On calcule la mémoire pour représenter chaque composante séparément :
-
-  1. P(A) :
-     - On doit stocker les probabilités de A (5 valeurs).
-     - MemA = 5 * 8 = 40 octets
-  2. P(B|A) :
-     - Pour chaque valeur de A (5 valeurs), on stocke les probabilités de B (5 valeurs).
-     - MemBA = 5 * 5 * 8 = 200 octets
-  3. P(C|B) :
-     - Pour chaque valeur de B (5 valeurs), on stocke les probabilités de C (5 valeurs).
-     - MemCB = 5 * 5 * 8 = 200 octets
-
-Ainsi, la mémoire totale nécessaire est :
-MemTotale = 40 + 200 + 200 = 440 octets
-
-Conclusion :
-L'indépendance conditionnelle partielle réduit significativement la mémoire nécessaire, démontrant une représentation plus efficace pour la distribution P(A, B, C).
-'''
+#Cas 1 : Sans indépendance conditionnelle
+#--------------------------------------------------
+#
+#On doit stocker toutes les combinaisons possibles de A, B et C. Cela se calcule comme suit :
+#  nbCombinaisons = |A| * |B| * |C| = 5 * 5 * 5 = 125
+#
+#Chaque combinaison occupe 8 octets, donc la mémoire totale nécessaire est :
+#  MemTotale = 125 * 8 = 1000 octets
+#
+#Cas 2 : Avec indépendance conditionnelle partielle
+#--------------------------------------------------
+#Sous l'hypothèse d'indépendance conditionnelle :
+#   P(A, B, C) = P(A) * P(B|A) * P(C|B)
+#
+#On calcule la mémoire pour représenter chaque composante séparément :
+#
+#  1. P(A) :
+#     - On doit stocker les probabilités de A (5 valeurs).
+#     - MemA = 5 * 8 = 40 octets
+#  2. P(B|A) :
+#     - Pour chaque valeur de A (5 valeurs), on stocke les probabilités de B (5 valeurs).
+#     - MemBA = 5 * 5 * 8 = 200 octets
+#  3. P(C|B) :
+#     - Pour chaque valeur de B (5 valeurs), on stocke les probabilités de C (5 valeurs).
+#     - MemCB = 5 * 5 * 8 = 200 octets
+#
+#Ainsi, la mémoire totale nécessaire est :
+#MemTotale = 40 + 200 + 200 = 440 octets
+#
+#Conclusion :
+#L'indépendance conditionnelle partielle réduit significativement la mémoire nécessaire, démontrant une représentation plus efficace pour la distribution P(A, B, C).
 #####
 
 #####
@@ -567,26 +549,24 @@ Cela signifie que chaque sommet a une flèche dirigée vers tous les autres somm
 #####
 # QUESTION 4.2. Naïve Bayes 
 #####
-'''
-
-Cas 1 : Décomposition de la vraisemblance
------------------------------------------------------------------------------
-P(attr1, attr2, attr3, ..., attrN | target) = P(attr1 | target) * P(attr2 | target) * P(attr3 | target) * ... * P(attrN | target)
-
-Grâce à l'hypothèse d'indépendance conditionnelle, la probabilité conjointe des attributs conditionnée à la variable cible 
-est simplifiée en un produit des probabilités conditionnelles de chaque attribut.
-
-Cas 2 : Décomposition de la distribution à posteriori
------------------------------------------------------------------------------
-La probabilité a posteriori est calculée grâce au théorème de Bayes, qui s'écrit comme suit :
-P(target | attr1, attr2, ..., attrN) = P(attr1, attr2, ..., attrN | target) * P(target) / P(attr1, attr2, ..., attrN)
-
-En utilisant l'hypothèse de Naïve Bayes (indépendance conditionnelle des attributs), la vraisemblance peut être réécrite comme : 
-P(attr1, attr2, ..., attrN | target) = P(attr1 | target) * P(attr2 | target) * ... * P(attrN | target)
-
-Ainsi, la probabilité a posteriori devient :
-P(target | attr1, attr2, ..., attrN) ∝ P(target) * P(attr1 | target) * P(attr2 | target) * ... * P(attrN | target)
-'''
+#Cas 1 : Décomposition de la vraisemblance
+#-----------------------------------------------------------------------------
+#P(attr1, attr2, attr3, ..., attrN | target) = P(attr1 | target) * P(attr2 | target) * P(attr3 | target) * ... * P(attrN | target)
+#
+#Grâce à l'hypothèse d'indépendance conditionnelle, la probabilité conjointe des attributs conditionnée à la variable cible 
+#est simplifiée en un produit des probabilités conditionnelles de chaque attribut.
+#
+#Cas 2 : Décomposition de la distribution à posteriori
+#-----------------------------------------------------------------------------
+#La probabilité a posteriori est calculée grâce au théorème de Bayes, qui s'écrit comme suit :
+#P(target | attr1, attr2, ..., attrN) = P(attr1, attr2, ..., attrN | target) * P(target) / P(attr1, attr2, ..., attrN)
+#
+#En utilisant l'hypothèse de Naïve Bayes (indépendance conditionnelle des attributs), la vraisemblance peut être réécrite comme : 
+#P(attr1, attr2, ..., attrN | target) = P(attr1 | target) * P(attr2 | target) * ... * P(attrN | target)
+#
+#Ainsi, la probabilité a posteriori devient :
+#P(target | attr1, attr2, ..., attrN) ∝ P(target) * P(attr1 | target) * P(attr2 | target) * ... * P(attrN | target)
+#####
 
 #####
 # QUESTION 4.3.a. Modèle graphique et naïve bayes
@@ -611,14 +591,15 @@ def drawNaiveBayes(df, obj="target") :
     Image
         L'image du graphe générée par la bibliothèque `utils.drawGraph`.
     """
-    attrs = [attr for attr in df.columns if attr != obj]  # On ne prend pas en compte le target
-    graph = ";".join([f"{obj}->{attr}" for attr in attrs])  # On construit les conexiones
+    attrs = [attr for attr in df.columns if attr != obj]  
+    graph = ";".join([f"{obj}->{attr}" for attr in attrs])  
 
     return utils.drawGraph(graph)
 
 #####
 # QUESTION 4.3.b. Modèle graphique et naïve bayes
 #####
+
 def nbParamsNaiveBayes(df, obj="target", attrs=None):
     """
     Calcule et affiche la mémoire nécessaire pour les tables P(target | attr)
@@ -650,19 +631,18 @@ def nbParamsNaiveBayes(df, obj="target", attrs=None):
 
     # Calculer la mémoire totale
     if len(attrs) == 0:
-        memoire_totale = 16  # target=1 ; target=0
+        memoire_totale = 16  
     else:
         memoire_totale = 0  
         for attr in attrs:
-            nb_valeurs_target = df[obj].nunique()  # Nombre de valeurs uniques dans target
-            nb_valeurs_attr = df[attr].nunique()   # Nombre de valeurs uniques dans l'attribut
+            nb_valeurs_target = df[obj].nunique()  
+            nb_valeurs_attr = df[attr].nunique()   
             memoire_table = nb_valeurs_target * nb_valeurs_attr
             memoire_totale += memoire_table
         
         # Conversion en octets et ajustement pour éviter de doubler P(target)
         memoire_totale = memoire_totale * 8 - 16
 
-    # Afficher le résultat formaté (octets, Ko, Mo, etc.)
     if memoire_totale > 1024:
         print(f"{len(attrs)} variable(s) : {memoire_totale}o = {_format_memory(memoire_totale)}")
     else:
@@ -672,6 +652,7 @@ def nbParamsNaiveBayes(df, obj="target", attrs=None):
 #####
 # QUESTION 4.4. Classifieurs Naïve Bayes
 #####
+
 class MLNaiveBayesClassifier(APrioriClassifier):
     """
     Classifieur Naïve Bayes basé sur le Maximum de Vraisemblance (ML).
@@ -686,8 +667,8 @@ class MLNaiveBayesClassifier(APrioriClassifier):
         dataframe : pandas.DataFrame
             Le DataFrame contenant les données d'apprentissage.
         """
-        super().__init__(dataframe)  # Appel au constructeur de APrioriClassifier
-        self.attrs = [col for col in dataframe.columns if col != 'target'] # On prend tous les attributs
+        super().__init__(dataframe)  
+        self.attrs = [col for col in dataframe.columns if col != 'target'] 
         self.cond_probs = {attr: P2D_l(dataframe, attr) for attr in self.attrs}  # P(attrN | target) , N=1...len(attrs)
 
     def estimProbas(self, x):
@@ -704,13 +685,11 @@ class MLNaiveBayesClassifier(APrioriClassifier):
         dict
             Un dictionnaire contenant les vraisemblances pour les classes cible 0 et 1.
         """
-        # Initialiser les résultats pour les deux classes cibles
         result1 = 1  # Pour target=0
         result2 = 1  # Pour target=1
 
-        # Parcourir les attributs
         for attr in self.attrs:
-            attr_value = x.get(attr, None)  # Récupérer la valeur de l'attribut dans x
+            attr_value = x.get(attr, None) 
 
             # Calculer pour target=0
             if attr_value in self.cond_probs[attr][0]:
@@ -718,11 +697,10 @@ class MLNaiveBayesClassifier(APrioriClassifier):
             else:
                 result1 *= 0  # Probabilité nulle si la valeur n'est pas présente
 
-            # Calculer pour target=1
             if attr_value in self.cond_probs[attr][1]:
                 result2 *= self.cond_probs[attr][1][attr_value]
             else:
-                result2 *= 0  # Probabilité nulle si la valeur n'est pas présente
+                result2 *= 0  
 
         # Retourner les résultats sous forme de dictionnaire
         return {0: result1, 1: result2}
@@ -743,7 +721,7 @@ class MLNaiveBayesClassifier(APrioriClassifier):
             La classe estimée (valeur de target).
         """
         probas = self.estimProbas(x)
-        return max(probas, key=probas.get)  # Retourne la classe avec la vraisemblance maximale
+        return max(probas, key=probas.get)  
 
 class MAPNaiveBayesClassifier(APrioriClassifier):
     """
@@ -760,9 +738,9 @@ class MAPNaiveBayesClassifier(APrioriClassifier):
         dataframe : pandas.DataFrame
             Le DataFrame contenant les données d'apprentissage.
         """
-        super().__init__(dataframe)  # Appel au constructeur de APrioriClassifier
+        super().__init__(dataframe)  
         self.df = dataframe
-        self.attrs = [col for col in dataframe.columns if col != 'target']  # On prend tous les attributs
+        self.attrs = [col for col in dataframe.columns if col != 'target']  
 
         # Calcul des probabilités conditionnelles P(attr | target)
         self.cond_probs = {attr: P2D_l(dataframe, attr) for attr in self.attrs}
@@ -787,7 +765,6 @@ class MAPNaiveBayesClassifier(APrioriClassifier):
         dict
             Un dictionnaire contenant les probabilités a posteriori pour chaque classe cible.
         """
-        # Estimer P(attrs | target) pour chaque classe
         result1 = 1  # Pour target=0
         result2 = 1  # Pour target=1
 
@@ -803,9 +780,8 @@ class MAPNaiveBayesClassifier(APrioriClassifier):
             else:
                 result2 *= 0
 
-        # Ajouter les probabilités a priori
         p = self.prior_probs.get(1, 0)  # P(target=1)
-        s = result1 * (1 - p) + result2 * p  # Dénominateur de normalisation
+        s = result1 * (1 - p) + result2 * p  
 
         if s != 0:
             return {0: result1 * (1 - p) / s, 1: result2 * p / s}
@@ -827,7 +803,7 @@ class MAPNaiveBayesClassifier(APrioriClassifier):
             La classe estimée (valeur de target).
         """
         probas = self.estimProbas(x)
-        return max(probas, key=probas.get)  # Retourne la classe avec la probabilité a posteriori maximale
+        return max(probas, key=probas.get)  
 
 #####
 # QUESTION 5.1. Voir si un certain attribut est indépendant de target
@@ -855,8 +831,6 @@ def isIndepFromTarget(df, attr, x):
     
     # Appliquer le test de chi²
     _, p_value, _, _ = stats.chi2_contingency(contingency_table)
-    
-    # Comparer le p-value avec le seuil
     return p_value >= x
 
 #####
@@ -881,7 +855,7 @@ class ReducedMLNaiveBayesClassifier(MLNaiveBayesClassifier):
         self.x = x
         # On ne prend que les attributs qui ne sont pas indépendants avec target
         self.attrs = [col for col in dataframe.columns if col != 'target' and not isIndepFromTarget(dataframe, col, self.x)]
-        self.cond_probs = {attr: P2D_l(dataframe, attr) for attr in self.attrs}  # P(attrN | target) , N=1...len(attrs)
+        self.cond_probs = {attr: P2D_l(dataframe, attr) for attr in self.attrs}  
 
     def draw(self, obj='target'):
         """
@@ -920,7 +894,7 @@ class ReducedMAPNaiveBayesClassifier(MAPNaiveBayesClassifier):
         dataframe : pandas.DataFrame
             Le DataFrame contenant les données d'apprentissage.
         """
-        super().__init__(dataframe)  # Appel au constructeur de APrioriClassifier
+        super().__init__(dataframe)  
         self.x = x 
         # On ne prend que les attributs qui ne sont pas indépendants avec target
         self.attrs = [col for col in dataframe.columns if col != 'target' and not isIndepFromTarget(dataframe, col, self.x)]
@@ -946,7 +920,6 @@ class ReducedMAPNaiveBayesClassifier(MAPNaiveBayesClassifier):
         # Créer les arêtes (obj -> chaque attribut sauf obj)
         edges = [f"{obj}->{attr};" for attr in self.attrs if attr != obj]
     
-        # Générer la chaîne et la dessiner avec utils.drawGraph
         graph_string = "".join(edges)
         return utils.drawGraph(graph_string)
 
@@ -980,35 +953,30 @@ def mapClassifiers(dic, df):
         Cette fonction n'a pas de retour mais affiche un graphique représentant les performances
         des classificateurs.
     """
-    # Initialisation des listes pour stocker les résultats
     results = []
     precisions = []
     recalls = []
     
-    # Parcourir chaque classificateur dans le dictionnaire
     for name, classifier in dic.items():
         # Obtenir les statistiques de précision et de rappel
         stats = classifier.statsOnDF(df)  # On suppose que statsOnDF retourne un dictionnaire avec 'Précision' et 'Rappel'
         precision = stats['Précision']
         recall = stats['Rappel']
-        # Ajouter les résultats au tableau
         results.append((name, precision, recall))
         precisions.append(precision)
         recalls.append(recall)
     
     # Calculer les limites des axes avec une marge
-    x_min = min(precisions) - 0.02  # Limite minimale pour l'axe X (avec une marge de 0.02)
-    x_max = max(precisions) + 0.02  # Limite maximale pour l'axe X (avec une marge de 0.02)
-    y_min = min(recalls) - 0.02  # Limite minimale pour l'axe Y (avec une marge de 0.02)
-    y_max = max(recalls) + 0.02  # Limite maximale pour l'axe Y (avec une marge de 0.02)
+    x_min = min(precisions) - 0.02  
+    x_max = max(precisions) + 0.02  
+    y_min = min(recalls) - 0.02  
+    y_max = max(recalls) + 0.02  
 
-    # Configurer la figure avec constrained_layout pour un ajustement automatique
-    plt.figure(figsize=(6, 6), facecolor='lightgray', constrained_layout=True)  # Fond gris clair avec ajustement
-
+    plt.figure(figsize=(6, 6), facecolor='lightgray', constrained_layout=True)  
     # Tracer les points pour chaque classificateur
     for name, precision, recall in results:
-        plt.scatter(precision, recall, color='red', marker='x', s=70)  # Points en forme de croix
-        plt.text(precision + 0.003, recall - 0.003, name, fontsize=9, color='black')  # Étiquettes près des points
+        plt.scatter(precision, recall, color='red', marker='x', s=70)  
+        plt.text(precision + 0.003, recall - 0.003, name, fontsize=9, color='black')  
 
     # Ajouter des lignes de référence pour les axes
     plt.axhline(1.0, color='gray', linestyle='--', linewidth=0.8, alpha=0.7)
@@ -1025,19 +993,16 @@ def mapClassifiers(dic, df):
 
     # Personnaliser les bordures ("spines")
     ax = plt.gca()  # Obtenir l'objet des axes courants
-    ax.spines['top'].set_linewidth(1)  # Épaisseur de la bordure supérieure
-    ax.spines['right'].set_linewidth(1)  # Épaisseur de la bordure droite
-    ax.spines['bottom'].set_linewidth(1)  # Épaisseur de la bordure inférieure
-    ax.spines['left'].set_linewidth(1)  # Épaisseur de la bordure gauche
-    ax.spines['top'].set_color('black')  # Couleur de la bordure supérieure
-    ax.spines['right'].set_color('black')  # Couleur de la bordure droite
-    ax.spines['bottom'].set_color('black')  # Couleur de la bordure inférieure
-    ax.spines['left'].set_color('black')  # Couleur de la bordure gauche
+    ax.spines['top'].set_linewidth(1) 
+    ax.spines['right'].set_linewidth(1)  
+    ax.spines['bottom'].set_linewidth(1)  
+    ax.spines['left'].set_linewidth(1) 
+    ax.spines['top'].set_color('black')  
+    ax.spines['right'].set_color('black')  
+    ax.spines['bottom'].set_color('black') 
+    ax.spines['left'].set_color('black')  
 
-    # Désactiver la grille
     plt.grid(False)
-
-    # Afficher le graphique
     plt.show()
 
 
