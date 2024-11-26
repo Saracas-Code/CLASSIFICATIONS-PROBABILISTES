@@ -526,24 +526,24 @@ def nbParamsIndep(df, attrs=None):
 #####
 
 #####
-# QUESTION 4.1. Exemples #### RÉVISER ####
+# QUESTION 4.1. Exemples 
 #####
-'''
-Cas 1
--------------------------------------------------------------
-Si les 5 variables sont totalement indépendantes, cela signifie que :
-P(A, B, C, D, E) = P(A) ⋅ P(B) ⋅ P(C) ⋅ P(D) ⋅ P(E)
-
-Cela pourrait être représenté par un graphe où aucun sommet n'a de parent.
-Autrement dit, le graphe résultant serait un graphe sans arêtes (graphe nul ou vide).
-
-Cas 2
--------------------------------------------------------------
-Si les variables ne sont pas indépendantes entre elles, cela signifie que :
-P(A, B, C, D, E) = P(A) ⋅ P(B|A) ⋅ P(C|A, B) ⋅ P(D|A, B, C) ⋅ P(E|A, B, C, D)
-Le graphe résultant sera un graphe orienté complet.
-Cela signifie que chaque sommet a une flèche dirigée vers tous les autres sommets.
-'''
+#Cas 1
+#-------------------------------------------------------------
+#Si les 5 variables sont totalement indépendantes, cela signifie que :
+#P(A, B, C, D, E) = P(A) ⋅ P(B) ⋅ P(C) ⋅ P(D) ⋅ P(E)
+#
+#Cela pourrait être représenté par un graphe où aucun sommet n'a de parent.
+#Autrement dit, le graphe résultant serait un graphe sans arêtes (graphe nul ou vide).
+#util.drawGraph("A;B;C;D;E")
+#
+#Cas 2
+#-------------------------------------------------------------
+#Si les variables ne sont pas indépendantes entre elles, cela signifie que :
+#P(A,B,C,D,E) = P(A∣B,C,D,E) ⋅ P(B∣C,D,E) ⋅ P(C∣D,E) ⋅ P(D∣E) ⋅ P(E)
+#Le graphe résultant sera un graphe orienté complet.
+#Cela signifie que chaque sommet a une flèche dirigée vers tous les autres sommets.
+#utils.drawGraph("B->A;C->A;D->A;E->A;A->B;A->C;A->D;A->E;B->C;B->D;B->E;C->D;C->E;D->E")
 #####
 
 #####
