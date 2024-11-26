@@ -5,11 +5,11 @@ import pandas as pd
 import utils
 import projet
 
-data = pd.read_csv("data/heart.csv")
+"""data = pd.read_csv("data/heart.csv")
 data.head()
 utils.viewData(data)
 discretise = utils.discretizeData(data)
-utils.viewData(discretise, kde=False)
+utils.viewData(discretise, kde=False)"""
 
 print("Q1.1-----------------------------------------------------------------------------------------------------------")
 train = pd.read_csv("data/train.csv")
