@@ -350,30 +350,18 @@ class MAP2DClassifier(APrioriClassifier):
 #####
 # QUESTION 2.4 : Comparaison
 ##### 
-#Avant d’exprimer notre opinion, nous tenons à souligner que les meilleures mesures de prédiction 
-#peuvent varier en fonction du contexte dans lequel elles sont utilisées. Il est donc essentiel 
-#d’évaluer chaque cas avec soin afin de parvenir à une conclusion adaptée. 
+# Avant d’exprimer notre opinion, nous tenons à souligner que les meilleures mesures de prédiction peuvent varier en fonction du contexte dans lequel elles sont utilisées. Il est donc essentiel d’évaluer chaque cas avec soin afin de parvenir à une conclusion adaptée. 
 #
-#Dans ce problème, l’objectif est de prédire si une personne est malade (target = 1) ou en bonne santé 
-#(target = 0) en utilisant des attributs individuels comme l’âge, le sexe, et d’autres caractéristiques. 
+# Dans ce problème, l’objectif est de prédire si une personne est malade (target = 1) ou en bonne santé (target = 0) en utilisant des attributs individuels comme l’âge, le sexe, et d’autres caractéristiques. 
 #
-#Parmi les classifieurs développés, le classifieur a priori (APrioriClassifier) est le plus simple, 
-#car il prédit toujours la classe majoritaire du jeu de données. Sa précision dépend uniquement de la proportion 
-#de la classe majoritaire dans l’échantillon, ce qui serait acceptable s’il existait une nette majorité dans les classes. 
-#Cependant, ce n’est pas le cas ici, car l’équilibre entre les classes n’est pas suffisamment marqué, 
-#ce qui limite considérablement son utilité. 
+# Parmi les classifieurs développés, le classifieur a priori (APrioriClassifier) est le plus simple, car il prédit toujours la classe majoritaire du jeu de données. Sa précision dépend uniquement de la proportion de la classe majoritaire dans l’échantillon, ce qui serait acceptable s’il existait une nette majorité dans les classes. 
 #
-#En revanche, le classifieur par maximum de vraisemblance (ML2DClassifier) améliore significativement 
-#les performances en prenant en compte les probabilités conditionnelles P(attr∣target), atteignant une bonne 
-#précision dans notre contexte. Toutefois, il ne tient pas compte des proportions globales des classes, ce qui peut 
-#poser problème dans des jeux de données déséquilibrés. 
+# Cependant, ce n’est pas le cas ici, car l’équilibre entre les classes n’est pas suffisamment marqué, ce qui limite considérablement son utilité. En revanche, le classifieur par maximum de vraisemblance (ML2DClassifier) améliore significativement 
+#les performances en prenant en compte les probabilités conditionnelles P(attr∣target), atteignant une bonne précision dans notre contexte. Toutefois, il ne tient pas compte des proportions globales des classes, ce qui peut poser problème dans des jeux de données déséquilibrés. 
 #
-#Enfin, le classifieur par maximum à posteriori (MAP2DClassifier) combine les probabilités conditionnelles 
-#avec les proportions globales des classes, ce qui lui permet de mieux gérer des scénarios réels où les classes sont souvent 
-#déséquilibrées. Bien qu’il puisse avoir une précision légèrement inférieure à celle du classifieur précédent, 
-#nous estimons qu’il est globalement le plus robuste et fiable pour ce type de problème. 
+# Enfin, le classifieur par maximum à posteriori (MAP2DClassifier) combine les probabilités conditionnelles avec les proportions globales des classes, ce qui lui permet de mieux gérer des scénarios réels où les classes sont souvent déséquilibrées. Bien qu’il puisse avoir une précision légèrement inférieure à celle du classifieur précédent, nous estimons qu’il est globalement le plus robuste et fiable pour ce type de problème. 
 #
-#Pour ces raisons, nous recommandons le MAP2DClassifier comme la meilleure option dans ce cas.
+# Pour ces raisons, nous recommandons le MAP2DClassifier comme la meilleure option dans ce cas.
 #####
 
 #####
@@ -487,42 +475,49 @@ def nbParamsIndep(df, attrs=None):
 #####
 # QUESTION 3.3.a. Montrer que P(A,B,C)=P(A)*P(B|A)*P(C|B)
 #####
-#P(A,B,C) = P(A) * P(B,C|A) = P(A) * P(B|A) * P(C|B,A) => Si C et A sont indépendantes => P(A) * P(B|A) * P(C|B)
+# P(A,B,C) = P(A) * P(B,C|A) = P(A) * P(B|A) * P(C|B,A) => Si C et A sont indépendantes => P(A) * P(B|A) * P(C|B)
 #####
+
 #####
 # QUESTION 3.3.b. Si les 3 variables A, B et C ont 5 valeurs, quelle est la taille mémoire en octet nécessaire pour représenter cette distribution avec et sans l'utilisation de l'indépendance conditionnelle ?
 #####
-#Cas 1 : Sans indépendance conditionnelle
-#--------------------------------------------------
+# Cas 1 : Sans indépendance conditionnelle
+# ----------------------------------------
+# Dans ce cas, toutes les combinaisons possibles de A, B et C doivent être stockées.
+# Le nombre total de combinaisons se calcule ainsi :
+#   nbCombinaisons = |A| * |B| * |C| = 5 * 5 * 5 = 125
 #
-#On doit stocker toutes les combinaisons possibles de A, B et C. Cela se calcule comme suit :
-#  nbCombinaisons = |A| * |B| * |C| = 5 * 5 * 5 = 125
+# Chaque combinaison occupe 8 octets en mémoire, donc la mémoire totale nécessaire est :
+#   MemTotale = 125 * 8 = 1000 octets
 #
-#Chaque combinaison occupe 8 octets, donc la mémoire totale nécessaire est :
-#  MemTotale = 125 * 8 = 1000 octets
-#
-#Cas 2 : Avec indépendance conditionnelle partielle
-#--------------------------------------------------
-#Sous l'hypothèse d'indépendance conditionnelle :
+
+# Cas 2 : Avec indépendance conditionnelle partielle
+# ---------------------------------------------------
+# Sous l'hypothèse d'indépendance conditionnelle, nous avons :
 #   P(A, B, C) = P(A) * P(B|A) * P(C|B)
 #
-#On calcule la mémoire pour représenter chaque composante séparément :
+# La mémoire nécessaire est calculée en représentant chaque composante séparément :
 #
 #  1. P(A) :
-#     - On doit stocker les probabilités de A (5 valeurs).
-#     - MemA = 5 * 8 = 40 octets
+#     - Nous devons stocker les probabilités associées à A (5 valeurs).
+#     - Mémoire requise : MemA = 5 * 8 = 40 octets
+#
 #  2. P(B|A) :
-#     - Pour chaque valeur de A (5 valeurs), on stocke les probabilités de B (5 valeurs).
-#     - MemBA = 5 * 5 * 8 = 200 octets
+#     - Pour chaque valeur de A (5 valeurs), nous stockons les probabilités de B (5 valeurs).
+#     - Mémoire requise : MemBA = 5 * 5 * 8 = 200 octets
+#
 #  3. P(C|B) :
-#     - Pour chaque valeur de B (5 valeurs), on stocke les probabilités de C (5 valeurs).
-#     - MemCB = 5 * 5 * 8 = 200 octets
+#     - Pour chaque valeur de B (5 valeurs), nous stockons les probabilités de C (5 valeurs).
+#     - Mémoire requise : MemCB = 5 * 5 * 8 = 200 octets
 #
-#Ainsi, la mémoire totale nécessaire est :
-#MemTotale = 40 + 200 + 200 = 440 octets
+# Ainsi, la mémoire totale nécessaire dans ce cas est :
+#   MemTotale = MemA + MemBA + MemCB = 40 + 200 + 200 = 440 octets
 #
-#Conclusion :
-#L'indépendance conditionnelle partielle réduit significativement la mémoire nécessaire, démontrant une représentation plus efficace pour la distribution P(A, B, C).
+# Comparaison :
+#   - Sans indépendance conditionnelle : 1000 octets
+#   - Avec indépendance conditionnelle partielle : 440 octets
+#
+# Conclusion : L'indépendance conditionnelle permet donc une réduction significative de la mémoire nécessaire.
 #####
 
 #####
@@ -539,11 +534,9 @@ def nbParamsIndep(df, attrs=None):
 #
 #Cas 2
 #-------------------------------------------------------------
-#Si les variables ne sont pas indépendantes entre elles, cela signifie que :
-#P(A,B,C,D,E) = P(A∣B,C,D,E) ⋅ P(B∣C,D,E) ⋅ P(C∣D,E) ⋅ P(D∣E) ⋅ P(E)
-#Le graphe résultant sera un graphe orienté complet.
-#Cela signifie que chaque sommet a une flèche dirigée vers tous les autres sommets.
-#utils.drawGraph("B->A;C->A;D->A;E->A;A->B;A->C;A->D;A->E;B->C;B->D;B->E;C->D;C->E;D->E")
+#Si toutes les variables doivent être dépendantes les unes des autres, il suffirait de réaliser un graphe contenant un cycle. 
+#Ce cycle montrerait la dépendance entre toutes les variables.
+#utils.drawGraph("A->B;B->C;C->D;D->E;E->A")
 #####
 
 #####
@@ -924,12 +917,17 @@ class ReducedMAPNaiveBayesClassifier(MAPNaiveBayesClassifier):
         return utils.drawGraph(graph_string)
 
 #####
-# QUESTION 6.1. ON DOIT LA FAIRE
+# QUESTION 6.1. Où se trouve le point idéal ?
 #####
 # Le point idéal se situe à (1,1).
-# Une Précision P = 1 signifique qu'il n'y a pas de faux positif et un rappel R = 1 signifie qu'il n'y a pas de faux négatif.
-# Donc le classifieur détecte tous les cas positifs sans aucune erreur.
-# Pour comparer les classifieurs entre eux, on peut calculer les distances horizontales et verticales du point par rapport au point idéal (1,1). 
+# Une Précision P = 1 signifie qu'il n'y a pas de faux positifs, et un rappel R = 1 signifie qu'il n'y a pas de faux négatifs, donc le classifieur détecte tous les cas positifs sans aucune erreur.
+#
+# Pour comparer les classifieurs entre eux, on peut calculer les distances horizontales et verticales du point (Précision, Rappel) de chaque classifieur par rapport au point idéal (1,1). Plus un classifieur est proche de ce point idéal, meilleure est sa performance globale en termes de compromis entre Précision et Rappel.
+#
+# Cependant, il est souvent très difficile d'obtenir un classifieur parfaitement équilibré, car améliorer la Précision peut parfois entraîner une diminution du Rappel, et inversement. Ainsi, en fonction du problème spécifique, il peut être judicieux de sacrifier légèrement la Précision pour améliorer le Rappel, par exemple dans des contextes où il est crucial de minimiser les faux négatifs (comme en médecine pour détecter des maladies).
+#
+# De même, on peut privilégier la Précision si les faux positifs ont un coût élevé (comme dans la détection de fraudes). Ce compromis dépend donc des priorités et des implications des erreurs dans le contexte d'application.
+
 #####
 # QUESTION 6.2. Représentation graphique
 #####
@@ -961,7 +959,7 @@ def mapClassifiers(dic, df):
     
     for name, classifier in dic.items():
         # Obtenir les statistiques de précision et de rappel
-        stats = classifier.statsOnDF(df)  # On suppose que statsOnDF retourne un dictionnaire avec 'Précision' et 'Rappel'
+        stats = classifier.statsOnDF(df)
         precision = stats['Précision']
         recall = stats['Rappel']
         results.append((name, precision, recall))
@@ -1009,6 +1007,218 @@ def mapClassifiers(dic, df):
 
 
 #####
-# QUESTION 6.3. ON DOIT LA FAIRE
+# QUESTION 6.3. Conclusion
 #####
-# ...
+# À partir des graphiques obtenus, nous pouvons observer que les classifieurs ont été entraînés exclusivement avec le fichier train.csv, mais leur performance a été évaluée à la fois sur les données d'entraînement (train.csv) et sur les données de test (test.csv). Cela nous permet d'évaluer leur capacité de généralisation.
+#
+# Dans le premier graphique, où les mêmes données d'entraînement sont utilisées, les classifieurs affichent une performance élevée, ce qui est attendu puisqu'ils ont été optimisés spécifiquement pour ces données. Cependant, dans le second graphique, qui évalue les classifieurs sur un nouveau jeu de données (test.csv), leurs métriques, en particulier le rappel, diminuent de manière significative, ce qui est logique car ils sont confrontés à des données inédites.
+#
+# Il est important de noter que les classifieurs Naive Bayes sont ceux qui subissent la plus forte chute de performance. Cela peut s'expliquer par leur forte dépendance à l'hypothèse d'indépendance conditionnelle, qui est rarement respectée dans les ensembles de données réels. Ce comportement suggère que les Naive Bayes ont des  difficultés à généraliser sur ce problème, probablement à cause des dépendances entre les variables.
+#
+# En général, cette différence de performance entre train et test indique que certains modèles peuvent être surajustés aux données d'entraînement, tandis que d'autres ne sont peut-être pas adaptés pour capturer la complexité du problème. Il serait recommandé d’explorer des classifieurs plus robustes et d’améliorer la validation croisée afin d’évaluer plus précisément leur capacité de généralisation.
+
+#####
+# QUESTION 7.1 : Calcul des informations mutuelles
+#####
+def MutualInformation(df, x, y):
+    """
+    Calcule l'information mutuelle entre deux variables x et y dans le DataFrame df
+    en utilisant la formule donnée avec log base 2.
+
+    Parameters
+    ----------
+    df : pandas.DataFrame
+        Le DataFrame contenant les données.
+    x : str
+        Le nom de la colonne représentant la variable X.
+    y : str
+        Le nom de la colonne représentant la variable Y.
+
+    Returns
+    -------
+    float
+        L'information mutuelle entre X et Y.
+    """
+    # Ici on fait le calcul pour les probabilités conjointes P(x, y)
+    joint_probs = df.groupby([x, y]).size() / len(df)
+    
+    # Maintenant, les probabilités marginales P(x) et P(y)
+    px = df[x].value_counts(normalize=True)
+    py = df[y].value_counts(normalize=True)
+
+    # Calcul de l'information mutuelle
+    mutual_info = 0.0
+    for (x_val, y_val), p_xy in joint_probs.items():
+        p_x = px[x_val]
+        p_y = py[y_val]
+        if p_xy > 0:  # Ça c'est pour éviter log(0)
+            mutual_info += p_xy * np.log2(p_xy / (p_x * p_y))
+    
+    return mutual_info
+
+
+def ConditionalMutualInformation(df, x, y, z):
+    """
+    Calcule l'information mutuelle conditionnelle entre x et y, conditionnée à z,
+    dans le DataFrame df, selon la formule donnée.
+
+    Parameters
+    ----------
+    df : pandas.DataFrame
+        Le DataFrame contenant les données.
+    x : str
+        Le nom de la colonne représentant la variable X.
+    y : str
+        Le nom de la colonne représentant la variable Y.
+    z : str
+        Le nom de la colonne représentant la variable Z (condition).
+
+    Returns
+    -------
+    float
+        L'information mutuelle conditionnelle entre X et Y, conditionnée à Z.
+    """
+    # Probabilités conjointes P(x, y, z)
+    joint_xyz = df.groupby([x, y, z]).size() / len(df)
+    
+    # Probabilités conjointes P(x, z) et P(y, z)
+    joint_xz = df.groupby([x, z]).size() / len(df)
+    joint_yz = df.groupby([y, z]).size() / len(df)
+    
+    # Probabilité marginale P(z)
+    marginal_z = df[z].value_counts(normalize=True)
+
+    # Calcul de l'information mutuelle conditionnelle
+    cmi = 0.0
+    for (x_val, y_val, z_val), p_xyz in joint_xyz.items():
+        p_xz = joint_xz[(x_val, z_val)]
+        p_yz = joint_yz[(y_val, z_val)]
+        p_z = marginal_z[z_val]
+
+        if p_xyz > 0 and p_xz > 0 and p_yz > 0 and p_z > 0:  # Eviter les divisions par zéro
+            cmi += p_xyz * np.log2((p_z * p_xyz) / (p_xz * p_yz))
+    
+    return cmi
+
+#####
+# QUESTION 7.2 : Calcul de la matrice des poids
+#####
+def MeanForSymetricWeights(a):
+    """
+    Calcule la moyenne des poids pour une matrice symétrique avec une diagonale nulle.
+
+    Parameters
+    ----------
+    a : numpy.ndarray
+        Matrice symétrique avec une diagonale nulle.
+
+    Returns
+    -------
+    float
+        La moyenne des poids non nuls de la matrice.
+    """
+    # Vérifier si la matrice est symétrique
+    if not np.allclose(a, a.T):
+        raise ValueError("La matrice n'est pas symétrique.")
+    
+    # Extraire les éléments hors de la diagonale
+    mask = ~np.eye(a.shape[0], dtype=bool)  # Mask pour exclure la diagonale
+    non_diagonal_elements = a[mask]
+    
+    # Calculer la moyenne
+    mean_weight = non_diagonal_elements.mean()
+    return float(mean_weight)
+
+def SimplifyConditionalMutualInformationMatrix(a):
+    """
+    Simplifie une matrice symétrique de diagonale nulle en annulant
+    toutes les valeurs plus petites que la moyenne.
+
+    Parameters
+    ----------
+    a : numpy.ndarray
+        Matrice symétrique avec une diagonale nulle.
+
+    Returns
+    -------
+    numpy.ndarray
+        Matrice simplifiée où les poids inférieurs à la moyenne sont annulés.
+    """
+    # Calculer la moyenne des poids
+    mean_weight = MeanForSymetricWeights(a)
+    
+    # Utiliser une masque pour annuler les valeurs inférieures à la moyenne
+    a[a < mean_weight] = 0.0
+
+    return a
+
+#####
+# QUESTION 7.3 : Arbre (forêt) optimal entre les attributs
+#####
+
+def Kruskal(df, a):
+    """
+    Implémente l'algorithme de Kruskal pour trouver l'arbre de poids maximal
+    à partir d'une matrice de poids symétrique avec une diagonale nulle.
+
+    Parameters
+    ----------
+    df : pandas.DataFrame
+        Le DataFrame contenant les colonnes correspondant aux attributs.
+    a : numpy.ndarray
+        Matrice symétrique de poids, avec une diagonale nulle.
+
+    Returns
+    -------
+    list
+        Liste des arcs (attr1, attr2, poids) dans l'arbre de poids maximal.
+    """
+    # Vérifier que la matrice est symétrique
+    if not np.allclose(a, a.T):
+        raise ValueError("La matrice n'est pas symétrique.")
+    
+    # Obtenir les noms des attributs
+    attributes = list(df.keys())
+
+    # Étape 1 : Extraire tous les bords (i, j, poids) de la matrice
+    edges = []
+    n = a.shape[0]
+    for i in range(n):
+        for j in range(i + 1, n):  # i < j pour éviter les doublons (symétrie)
+            if a[i, j] > 0:  # On ignore les poids nuls
+                edges.append((i, j, a[i, j]))
+
+    # Étape 2 : Trier les bords par poids décroissant
+    edges.sort(key=lambda x: x[2], reverse=True)
+
+    # Union-Find pour détecter les cycles
+    parent = list(range(n))
+    rank = [0] * n
+
+    def find(node):
+        if parent[node] != node:
+            parent[node] = find(parent[node])  # Compression de chemin
+        return parent[node]
+
+    def union(node1, node2):
+        root1 = find(node1)
+        root2 = find(node2)
+        if root1 != root2:
+            if rank[root1] > rank[root2]:
+                parent[root2] = root1
+            elif rank[root1] < rank[root2]:
+                parent[root1] = root2
+            else:
+                parent[root2] = root1
+                rank[root1] += 1
+
+    # Étape 3 : Construire l'arbre de poids maximal
+    mst = []
+    for i, j, weight in edges:
+        if find(i) != find(j):  # Si les deux sommets ne forment pas un cycle
+            mst.append((attributes[i], attributes[j], weight))
+            union(i, j)
+
+    return mst
+
+
