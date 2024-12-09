@@ -932,25 +932,25 @@ class ReducedMAPNaiveBayesClassifier(MAPNaiveBayesClassifier):
 #####
 def mapClassifiers(dic, df): 
     """
-    Trace une représentation graphique des classificateurs en termes de précision et rappel.
+    Trace une représentation graphique des classificateurs en termes de précision et rappel
 
     Cette fonction calcule les métriques de précision et de rappel pour chaque classificateur
     contenu dans le dictionnaire fourni, puis affiche ces métriques sur un graphique avec des
-    limites calculées dynamiquement.
+    limites calculées dynamiquement
 
     Parameters
     ----------
     dic : dict
         Un dictionnaire où les clés sont des noms de classificateurs (str) et les valeurs sont des
-        instances de classificateurs capables de fournir des statistiques.
+        instances de classificateurs capables de fournir des statistiques
     df : pandas.DataFrame
-        Le dataframe contenant les données sur lesquelles évaluer les classificateurs.
+        Le dataframe contenant les données sur lesquelles évaluer les classificateurs
 
     Returns
     -------
     None
         Cette fonction n'a pas de retour mais affiche un graphique représentant les performances
-        des classificateurs.
+        des classificateurs
     """
     results = []
     precisions = []
@@ -1025,21 +1025,21 @@ def mapClassifiers(dic, df):
 def MutualInformation(df, x, y):
     """
     Calcule l'information mutuelle entre deux variables x et y dans le DataFrame df
-    en utilisant la formule donnée avec log base 2.
+    en utilisant la formule donnée avec log base 2
 
     Parameters
     ----------
     df : pandas.DataFrame
-        Le DataFrame contenant les données.
+        Le DataFrame contenant les données
     x : str
-        Le nom de la colonne représentant la variable X.
+        Le nom de la colonne représentant la variable X
     y : str
-        Le nom de la colonne représentant la variable Y.
+        Le nom de la colonne représentant la variable Y
 
     Returns
     -------
     float
-        L'information mutuelle entre X et Y.
+        L'information mutuelle entre X et Y
     """
     # Ici on fait le calcul pour les probabilités conjointes P(x, y)
     joint_probs = df.groupby([x, y]).size() / len(df)
@@ -1060,23 +1060,23 @@ def MutualInformation(df, x, y):
 
 def ConditionalMutualInformation(df, x, y, z):
     """
-    Calcule l'information mutuelle conditionnelle entre x et y, conditionnée à z, dans le DataFrame df, selon la formule donnée.
+    Calcule l'information mutuelle conditionnelle entre x et y, conditionnée à z, dans le DataFrame df, selon la formule donnée
 
     Parameters
     ----------
     df : pandas.DataFrame
-        Le DataFrame contenant les données.
+        Le DataFrame contenant les données
     x : str
-        Le nom de la colonne représentant la variable X.
+        Le nom de la colonne représentant la variable X
     y : str
-        Le nom de la colonne représentant la variable Y.
+        Le nom de la colonne représentant la variable Y
     z : str
-        Le nom de la colonne représentant la variable Z (condition).
+        Le nom de la colonne représentant la variable Z (condition)
 
     Returns
     -------
     float
-        L'information mutuelle conditionnelle entre X et Y, conditionnée à Z.
+        L'information mutuelle conditionnelle entre X et Y, conditionnée à Z
     """
     # Probabilités conjointes P(x, y, z)
     joint_xyz = df.groupby([x, y, z]).size() / len(df)
@@ -1105,17 +1105,17 @@ def ConditionalMutualInformation(df, x, y, z):
 #####
 def MeanForSymetricWeights(a):
     """
-    Calcule la moyenne des poids pour une matrice symétrique avec une diagonale nulle.
+    Calcule la moyenne des poids pour une matrice symétrique avec une diagonale nulle
 
     Parameters
     ----------
     a : numpy.ndarray
-        Matrice symétrique avec une diagonale nulle.
+        Matrice symétrique avec une diagonale nulle
 
     Returns
     -------
     float
-        La moyenne des poids non nuls de la matrice.
+        La moyenne des poids non nuls de la matrice
     """
     # Vérifier si la matrice est symétrique
     if not np.allclose(a, a.T):
@@ -1132,17 +1132,17 @@ def MeanForSymetricWeights(a):
 def SimplifyConditionalMutualInformationMatrix(a):
     """
     Simplifie une matrice symétrique de diagonale nulle en annulant
-    toutes les valeurs plus petites que la moyenne.
+    toutes les valeurs plus petites que la moyenne
 
     Parameters
     ----------
     a : numpy.ndarray
-        Matrice symétrique avec une diagonale nulle.
+        Matrice symétrique avec une diagonale nulle
 
     Returns
     -------
     numpy.ndarray
-        Matrice simplifiée où les poids inférieurs à la moyenne sont annulés.
+        Matrice simplifiée où les poids inférieurs à la moyenne sont annulés
     """
     # Calculer la moyenne des poids
     mean_weight = MeanForSymetricWeights(a)
@@ -1157,14 +1157,14 @@ def SimplifyConditionalMutualInformationMatrix(a):
 #####
 def Kruskal(df, a):
     """
-    Implémente l'algorithme de Kruskal pour trouver l'arbre de poids maximal, avec un seuil de poids pour éliminer les arêtes faibles (< 0.25).
+    Implémente l'algorithme de Kruskal pour trouver l'arbre de poids maximal, avec un seuil de poids pour éliminer les arêtes faibles (< 0.25)
 
     Parameters
     ----------
     df : pandas.DataFrame
-        Le DataFrame contenant les colonnes correspondant aux attributs.
+        Le DataFrame contenant les colonnes correspondant aux attributs
     a : numpy.ndarray
-        Matrice symétrique de poids, avec une diagonale nulle.
+        Matrice symétrique de poids, avec une diagonale nulle
 
     Returns
     -------
@@ -1192,13 +1192,13 @@ def Kruskal(df, a):
     # Étape 2 : Trier les bords par poids décroissant
     edges.sort(key=lambda x: x[2], reverse=True)
 
-    # Union-Find pour détecter les cycles
+    #détecter les cycles
     parent = list(range(n))
     rank = [0] * n
 
     def find(node):
         if parent[node] != node:
-            parent[node] = find(parent[node])  # Compression de chemin
+            parent[node] = find(parent[node])
         return parent[node]
 
     def union(node1, node2):
@@ -1231,22 +1231,22 @@ def Kruskal(df, a):
 #####
 def ConnexSets(list_arcs):
     """
-    Crée une liste des ensembles d'attributs connectés à partir d'une liste d'arcs.
+    Crée une liste des ensembles d'attributs connectés à partir d'une liste d'arcs
     
     Parameters
     ----------
     list_arcs : list of tuple
-        Liste d'arcs où chaque arc est représenté par un tuple (attribut1, attribut2, poids).
+        Liste d'arcs où chaque arc est représenté par un tuple (attribut1, attribut2, poids)
         
     Returns
     -------
     list of set
-        Liste d'ensembles d'attributs connectés.
+        Liste d'ensembles d'attributs connectés
     """
     connex_sets = []
 
     for arc in list_arcs:
-        a, b, _ = arc  # Extraire les attributs a et b
+        a, b, _ = arc
         set_a, set_b = None, None
 
         # Vérifier si a ou b est déjà dans un ensemble existant
@@ -1262,13 +1262,10 @@ def ConnexSets(list_arcs):
                 set_a.update(set_b)
                 connex_sets.remove(set_b)
         elif set_a:
-            # Ajouter b à l'ensemble contenant a
             set_a.add(b)
         elif set_b:
-            # Ajouter a à l'ensemble contenant b
             set_b.add(a)
         else:
-            # Créer un nouveau ensemble avec a et b
             connex_sets.append(set([a, b]))
 
     return connex_sets
@@ -1276,21 +1273,21 @@ def ConnexSets(list_arcs):
 def OrientConnexSets(df, arcs, target_class):
     """
     Oriente les ensembles connexes en déterminant une racine pour chaque ensemble
-    à l'aide de l'information mutuelle avec la classe cible.
+    à l'aide de l'information mutuelle avec la classe cible
 
     Parameters
     ----------
     df : pandas.DataFrame
-        Le DataFrame contenant les données.
+        Le DataFrame contenant les données
     arcs : list of tuple
         Liste des arcs non orientés sous la forme (attribut1, attribut2, poids).
     target_class : str
-        Le nom de la colonne représentant la classe cible.
+        Le nom de la colonne représentant la classe cible
 
     Returns
     -------
     list of tuple
-        Liste des arcs orientés sous la forme (parent, enfant).
+        Liste des arcs orientés sous la forme (parent, enfant)
     """
     # Obtenir les ensembles connexes
     connex_sets = ConnexSets(arcs)
@@ -1338,13 +1335,13 @@ def OrientConnexSets(df, arcs, target_class):
 #####
 class MAPTANClassifier(APrioriClassifier):
     """
-    Classificateur basé sur le modèle Tree Augmented Naive Bayes (TAN).
-    Hérite de la classe APrioriClassifier.
+    Classificateur basé sur le modèle Tree Augmented Naive Bayes (TAN)
+    Hérite de la classe APrioriClassifier
 
     Methods
     -------
     __init__(dataframe):
-        Initialise le classificateur MAPTANClassifier à partir d'un DataFrame donné.
+        Initialise le classificateur MAPTANClassifier à partir d'un DataFrame donné
     """
 
     def __init__(self, dataframe):
@@ -1355,7 +1352,7 @@ class MAPTANClassifier(APrioriClassifier):
         ----------
         dataframe : pandas.DataFrame
             Le DataFrame contenant les données d'apprentissage, avec une colonne 'target'
-            représentant la variable cible.
+            représentant la variable cible
 
         Attributes
         ----------
@@ -1363,9 +1360,9 @@ class MAPTANClassifier(APrioriClassifier):
             Une matrice 2D contenant l'information mutuelle conditionnelle pour chaque paire
             d'attributs donnée la variable cible.
         liste_arcs : list of tuple
-            Une liste d'arcs non orientés représentant les connexions TAN maximales.
+            Une liste d'arcs non orientés représentant les connexions TAN maximales
         oriented_connex_sets : list of tuple
-            Une liste des arcs orientés résultant de l'arbre TAN construit.
+            Une liste des arcs orientés résultant de l'arbre TAN construit
 
         """
         super().__init__(dataframe)  
@@ -1385,9 +1382,9 @@ class MAPTANClassifier(APrioriClassifier):
     
     def draw(self) : 
         """
-        Dessine un graphe représentant la structure TAN.
-        1. Connecte 'target' à tous les autres attributs.
-        2. Ajoute les arcs orientés de oriented_connex_sets.
+        Dessine un graphe représentant la structure TAN
+        1. Connecte 'target' à tous les autres attributs
+        2. Ajoute les arcs orientés de oriented_connex_sets
         """
         # Initialiser les connexions avec 'target'
         arcs = []
@@ -1409,17 +1406,17 @@ class MAPTANClassifier(APrioriClassifier):
 
     def estimProbas(self, x):
         """
-        Estime les probabilités de chaque classe (0 ou 1) pour un individu donné.
+        Estime les probabilités de chaque classe (0 ou 1) pour un individu donné
 
         Parameters
         ----------
         x : dict
-            Un dictionnaire représentant un individu (attr1: val1, attr2: val2, ...).
+            Un dictionnaire représentant un individu (attr1: val1, attr2: val2, ...)
 
         Returns
         -------
         dict
-            Un dictionnaire contenant les probabilités pour chaque classe cible (0 et 1).
+            Un dictionnaire contenant les probabilités pour chaque classe cible (0 et 1)
         """
         # Initialiser avec les probabilités a priori
         result = {0: 1 - self.prior['estimation'], 1: self.prior['estimation']}
@@ -1487,12 +1484,12 @@ class MAPTANClassifier(APrioriClassifier):
 
     def estimClass(self, x):
         """
-        Estime la classe (0 ou 1) avec la probabilité la plus élevée pour un individu donné.
+        Estime la classe (0 ou 1) avec la probabilité la plus élevée pour un individu donné
 
         Parameters
         ----------
         x : dict
-            Une ligne du DataFrame représentée sous forme de dictionnaire.
+            Une ligne du DataFrame représentée sous forme de dictionnaire
 
         Returns
         -------
@@ -1500,7 +1497,7 @@ class MAPTANClassifier(APrioriClassifier):
             La classe estimée (0 ou 1).
         """
         probas = self.estimProbas(x)
-        return max(probas, key=probas.get)  # Retourne la clé avec la proba maximale
+        return max(probas, key=probas.get)
 
 #####
 # QUESTION 8 : CONCLUSION FINALE
