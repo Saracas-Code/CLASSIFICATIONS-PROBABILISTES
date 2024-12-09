@@ -26,7 +26,6 @@ def getPrior(dataframe):
         Un dictionnaire contenant 'estimation', 'min5pourcent', et 'max5pourcent'.
     """
 
-
     n = len(dataframe)
     p = dataframe['target'].mean()
 
@@ -1005,7 +1004,6 @@ def mapClassifiers(dic, df):
     plt.grid(False)
     plt.show()
 
-
 #####
 # QUESTION 6.3. Conclusion
 #####
@@ -1016,6 +1014,10 @@ def mapClassifiers(dic, df):
 # Il est important de noter que les classifieurs Naive Bayes sont ceux qui subissent la plus forte chute de performance. Cela peut s'expliquer par leur forte dépendance à l'hypothèse d'indépendance conditionnelle, qui est rarement respectée dans les ensembles de données réels. Ce comportement suggère que les Naive Bayes ont des  difficultés à généraliser sur ce problème, probablement à cause des dépendances entre les variables.
 #
 # En général, cette différence de performance entre train et test indique que certains modèles peuvent être surajustés aux données d'entraînement, tandis que d'autres ne sont peut-être pas adaptés pour capturer la complexité du problème. Il serait recommandé d’explorer des classifieurs plus robustes et d’améliorer la validation croisée afin d’évaluer plus précisément leur capacité de généralisation.
+
+####################
+# QUESTION 7 BONUS #
+####################
 
 #####
 # QUESTION 7.1 : Calcul des informations mutuelles
@@ -1056,11 +1058,9 @@ def MutualInformation(df, x, y):
     
     return mutual_info
 
-
 def ConditionalMutualInformation(df, x, y, z):
     """
-    Calcule l'information mutuelle conditionnelle entre x et y, conditionnée à z,
-    dans le DataFrame df, selon la formule donnée.
+    Calcule l'information mutuelle conditionnelle entre x et y, conditionnée à z, dans le DataFrame df, selon la formule donnée.
 
     Parameters
     ----------
@@ -1155,11 +1155,9 @@ def SimplifyConditionalMutualInformationMatrix(a):
 #####
 # QUESTION 7.3 : Arbre (forêt) optimal entre les attributs
 #####
-
 def Kruskal(df, a):
     """
-    Implémente l'algorithme de Kruskal pour trouver l'arbre de poids maximal
-    à partir d'une matrice de poids symétrique avec une diagonale nulle.
+    Implémente l'algorithme de Kruskal pour trouver l'arbre de poids maximal, avec un seuil de poids pour éliminer les arêtes faibles (< 0.25).
 
     Parameters
     ----------
@@ -1171,8 +1169,10 @@ def Kruskal(df, a):
     Returns
     -------
     list
-        Liste des arcs (attr1, attr2, poids) dans l'arbre de poids maximal.
+        Liste des arcs (attr1, attr2, poids) dans l'arbre de poids maximal,
+        avec les poids >= 0.25.
     """
+
     # Vérifier que la matrice est symétrique
     if not np.allclose(a, a.T):
         raise ValueError("La matrice n'est pas symétrique.")
@@ -1180,6 +1180,7 @@ def Kruskal(df, a):
     # Obtenir les noms des attributs
     attributes = list(df.keys())
 
+    ######## ALGORITHME DE KRUSKAL ########
     # Étape 1 : Extraire tous les bords (i, j, poids) de la matrice
     edges = []
     n = a.shape[0]
@@ -1215,10 +1216,299 @@ def Kruskal(df, a):
     # Étape 3 : Construire l'arbre de poids maximal
     mst = []
     for i, j, weight in edges:
-        if find(i) != find(j):  # Si les deux sommets ne forment pas un cycle
+        if find(i) != find(j):  # PAS DE CYCLE
             mst.append((attributes[i], attributes[j], weight))
             union(i, j)
 
-    return mst
+    # Étape 4 : Filtrer les arêtes avec un poids < 0.25. C'est à dire, on ne stocke que les poids plus significants (attributs dépendants) 
+    threshold = 0.25
+    mst_filtered = [(attr1, attr2, weight) for attr1, attr2, weight in mst if weight >= threshold]
+
+    return mst_filtered
+
+#####
+# QUESTION 7.4 : Orientation des arcs entre attributs
+#####
+def ConnexSets(list_arcs):
+    """
+    Crée une liste des ensembles d'attributs connectés à partir d'une liste d'arcs.
+    
+    Parameters
+    ----------
+    list_arcs : list of tuple
+        Liste d'arcs où chaque arc est représenté par un tuple (attribut1, attribut2, poids).
+        
+    Returns
+    -------
+    list of set
+        Liste d'ensembles d'attributs connectés.
+    """
+    connex_sets = []
+
+    for arc in list_arcs:
+        a, b, _ = arc  # Extraire les attributs a et b
+        set_a, set_b = None, None
+
+        # Vérifier si a ou b est déjà dans un ensemble existant
+        for s in connex_sets:
+            if a in s:
+                set_a = s
+            if b in s:
+                set_b = s
+
+        if set_a and set_b:
+            if set_a != set_b:
+                # Fusionner les ensembles s'ils sont distincts
+                set_a.update(set_b)
+                connex_sets.remove(set_b)
+        elif set_a:
+            # Ajouter b à l'ensemble contenant a
+            set_a.add(b)
+        elif set_b:
+            # Ajouter a à l'ensemble contenant b
+            set_b.add(a)
+        else:
+            # Créer un nouveau ensemble avec a et b
+            connex_sets.append(set([a, b]))
+
+    return connex_sets
+
+def OrientConnexSets(df, arcs, target_class):
+    """
+    Oriente les ensembles connexes en déterminant une racine pour chaque ensemble
+    à l'aide de l'information mutuelle avec la classe cible.
+
+    Parameters
+    ----------
+    df : pandas.DataFrame
+        Le DataFrame contenant les données.
+    arcs : list of tuple
+        Liste des arcs non orientés sous la forme (attribut1, attribut2, poids).
+    target_class : str
+        Le nom de la colonne représentant la classe cible.
+
+    Returns
+    -------
+    list of tuple
+        Liste des arcs orientés sous la forme (parent, enfant).
+    """
+    # Obtenir les ensembles connexes
+    connex_sets = ConnexSets(arcs)
+    oriented_arcs = []
+
+    for connex_set in connex_sets:
+        # Calculer l'information mutuelle entre chaque attribut de l'ensemble et la classe cible
+        mutual_info = {attr: MutualInformation(df, target_class, attr) for attr in connex_set}
+
+        # Trouver la racine (l'attribut avec la plus haute information mutuelle)
+        root = max(mutual_info, key=mutual_info.get)
+
+        # Construire un graphe à partir des arcs pour respecter les connexions
+        graph = {attr: [] for attr in connex_set}
+        for a, b, _ in arcs:
+            if a in connex_set and b in connex_set:
+                graph[a].append(b)
+                graph[b].append(a)
+
+        # Orienter les arcs en priorisant l'ordre des arcs donnés
+        visited = set()
+        stack = [root]
+
+        while stack:
+            parent = stack.pop()
+            visited.add(parent)
+
+            # Prioriser les enfants selon l'ordre dans la liste originale des arcs
+            children = sorted(
+                [child for child in graph[parent] if child not in visited],
+                key=lambda x: next(
+                    (i for i, arc in enumerate(arcs) if (arc[0] == parent and arc[1] == x) or (arc[0] == x and arc[1] == parent)),
+                    float('inf')
+                )
+            )
+
+            for child in children:
+                oriented_arcs.append((parent, child))
+                stack.append(child)
+
+    return oriented_arcs
+
+#####
+# QUESTION 7.5 : Classifieur TAN
+#####
+class MAPTANClassifier(APrioriClassifier):
+    """
+    Classificateur basé sur le modèle Tree Augmented Naive Bayes (TAN).
+    Hérite de la classe APrioriClassifier.
+
+    Methods
+    -------
+    __init__(dataframe):
+        Initialise le classificateur MAPTANClassifier à partir d'un DataFrame donné.
+    """
+
+    def __init__(self, dataframe):
+        """
+        Initialise la structure TAN en calculant l'information mutuelle conditionnelle entre les attributs, en construisant un arbre maximum et en orientant les connexions.
+
+        Parameters
+        ----------
+        dataframe : pandas.DataFrame
+            Le DataFrame contenant les données d'apprentissage, avec une colonne 'target'
+            représentant la variable cible.
+
+        Attributes
+        ----------
+        cmis : numpy.ndarray
+            Une matrice 2D contenant l'information mutuelle conditionnelle pour chaque paire
+            d'attributs donnée la variable cible.
+        liste_arcs : list of tuple
+            Une liste d'arcs non orientés représentant les connexions TAN maximales.
+        oriented_connex_sets : list of tuple
+            Une liste des arcs orientés résultant de l'arbre TAN construit.
+
+        """
+        super().__init__(dataframe)  
+        self.dataframe = dataframe
+
+        # Calculer la matrice d'information mutuelle conditionnelle (CMI)
+        cmis = np.array([[0 if x == y else ConditionalMutualInformation(dataframe, x, y, "target") for x in dataframe.keys() if x != "target"] for y in dataframe.keys() if y != "target"])
+
+        self.cmis = SimplifyConditionalMutualInformationMatrix(cmis)
+
+        # Construire un arbre maximum avec Kruskal
+        self.liste_arcs = Kruskal(dataframe, cmis)
+
+        # Orienter les connexions dans l'arbre
+        self.oriented_connex_sets = OrientConnexSets(dataframe, self.liste_arcs, 'target')
+
+    
+    def draw(self) : 
+        """
+        Dessine un graphe représentant la structure TAN.
+        1. Connecte 'target' à tous les autres attributs.
+        2. Ajoute les arcs orientés de oriented_connex_sets.
+        """
+        # Initialiser les connexions avec 'target'
+        arcs = []
+        attributes = [col for col in self.dataframe.columns if col != "target"]
+
+        # Ajouter les connexions de 'target' vers chaque attribut
+        for attr in attributes:
+            arcs.append(f"target->{attr}")
+
+        # Ajouter les connexions de oriented_connex_sets
+        for parent, child in self.oriented_connex_sets:
+            arcs.append(f"{parent}->{child}")
+
+        # Formater les arcs en chaîne
+        arcs_str = "; ".join(arcs)
+
+        # Dessiner le graphe
+        return utils.drawGraph(arcs_str)
+
+    def estimProbas(self, x):
+        """
+        Estime les probabilités de chaque classe (0 ou 1) pour un individu donné.
+
+        Parameters
+        ----------
+        x : dict
+            Un dictionnaire représentant un individu (attr1: val1, attr2: val2, ...).
+
+        Returns
+        -------
+        dict
+            Un dictionnaire contenant les probabilités pour chaque classe cible (0 et 1).
+        """
+        # Initialiser avec les probabilités a priori
+        result = {0: 1 - self.prior['estimation'], 1: self.prior['estimation']}
+
+        # Obtenir tous les attributs du DataFrame sauf la colonne 'target'
+        all_attributes = set(self.dataframe.columns) - {'target'}
+
+        # Suivre les attributs déjà traités dans oriented_connex_sets
+        processed_children = set()
+
+        # Ajuster les probabilités avec les connexions TAN
+        for parent, child in self.oriented_connex_sets:
+            processed_children.add(child)
+            for target_value in [0, 1]:
+                parent_value = x[parent]
+                child_value = x[child]
+
+                # Filtrer les données pour calculer P(child | parent, target)
+                subset = self.dataframe[
+                    (self.dataframe[parent] == parent_value) & (self.dataframe['target'] == target_value)
+                ]
+                parent_target_subset = self.dataframe[
+                    (self.dataframe['target'] == target_value) & (self.dataframe[parent] == parent_value)
+                ]
+
+                # Appliquer le lissage de Laplace
+                unique_child_values = len(self.dataframe[child].unique())
+                conditional_proba = (
+                    subset[subset[child] == child_value].shape[0] + 1
+                ) / (
+                    parent_target_subset.shape[0] + unique_child_values
+                )
+
+                # Multiplier les probabilités accumulées
+                result[target_value] *= conditional_proba
+
+        # Calculer P(attr | target) pour les attributs non traités
+        for attr in all_attributes - processed_children:
+            for target_value in [0, 1]:
+                attr_value = x[attr]
+
+                # Récupérer le nombre de valeurs uniques pour l'attribut
+                unique_attr_values = len(self.dataframe[attr].unique())
+
+                # Calculer la probabilité avec le lissage de Laplace
+                subset_target = self.dataframe[self.dataframe['target'] == target_value]
+                count = len(subset_target[subset_target[attr] == attr_value])
+                total = len(subset_target)
+
+                conditional_proba = (count + 1) / (total + unique_attr_values)
+
+                # Multiplier les probabilités accumulées
+                result[target_value] *= conditional_proba
+
+        # Normaliser les probabilités pour qu'elles totalisent 1
+        total = result[0] + result[1]
+        if total > 0:
+            result[0] /= total
+            result[1] /= total
+        else:
+            result = {0: 0.5, 1: 0.5}
+
+        return result
 
 
+    def estimClass(self, x):
+        """
+        Estime la classe (0 ou 1) avec la probabilité la plus élevée pour un individu donné.
+
+        Parameters
+        ----------
+        x : dict
+            Une ligne du DataFrame représentée sous forme de dictionnaire.
+
+        Returns
+        -------
+        int
+            La classe estimée (0 ou 1).
+        """
+        probas = self.estimProbas(x)
+        return max(probas, key=probas.get)  # Retourne la clé avec la proba maximale
+
+#####
+# QUESTION 8 : CONCLUSION FINALE
+#####
+# L’analyse des performances des classifieurs bayésiens met en évidence des forces et des faiblesses propres à chaque méthode. Le MAPTANClassifier, élaboré dans la question bonus, se distingue par sa capacité à capturer les dépendances conditionnelles entre attributs grâce à sa structure TAN. Ses performances sont excellentes, avec une précision et un rappel proches de 1 sur les ensembles d’entraînement et de test. Toutefois, cette performance a un coût : le MAPTANClassifier est plus lourd à calculer et nécessite des ressources supplémentaires, ce qui peut poser des défis pour des bases de données de très grande taille.
+#
+# À l’inverse, les classifieurs ML2DClassifier et MAP2DClassifier, bien que plus simples, offrent des résultats intéressants. Si leurs performances sont inférieures à celles du MAPTANClassifier, ils se défendent mieux dans d’autres jeux de données où les dépendances entre attributs sont moins significatives. Ces modèles, rapides à entraîner et à tester, se révèlent adaptés pour des applications nécessitant des solutions légères et efficaces.
+#
+# Les modèles bayésiens naïfs (MLNaiveBayesClassifier et MAPNaiveBayesClassifier) affichent une bonne précision, mais leur rappel plus faible sur l’ensemble de test souligne les limites de leur hypothèse simpliste d’indépendance entre attributs, les empêchant de gérer des relations complexes. Les versions réduites (ReducedMAPNaiveBayesClassifier) constituent un compromis équilibré entre généralisation et simplicité.
+# 
+# En conclusion, le MAPTANClassifier est le plus performant de cette sélection de classifieurs, mais également le plus coûteux en ressources. Les classifieurs plus simples, tels que le ML2DClassifier et le MAP2DClassifier, restent des alternatives viables selon les contextes, en particulier pour des situations nécessitant un compromis entre complexité et efficacité. Le choix final doit toujours être guidé par les spécificités des données et les contraintes opérationnelles.
